@@ -1,0 +1,16 @@
+{
+    "site": {
+      "id": "gicoin-dapp",
+      "name": "GICOIN DApp",
+      "description": "Decentralized Staking & Governance Dashboard for GICOIN"
+    },
+    "build": {
+      "command": "npm run build",
+      "output": "out"
+    },
+    "hosting": {
+      "platform": "ipfs",
+      "framework": "nextjs"
+    }
+  }
+  

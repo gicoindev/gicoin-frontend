@@ -1,0 +1,54 @@
+name: Build + Export + Upload to Web3.Storage
+on:
+  push:
+    branches: [ main ]  # atau production
+jobs:
+  build-and-ipfs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Export static
+        run: npm run export
+
+      - name: Upload to web3.storage
+        env:
+          WEB3_STORAGE_TOKEN: ${{ secrets.WEB3_STORAGE_TOKEN }}
+        run: |
+          npm install web3.storage
+          node scripts/upload-to-ipfs.js
+
+      - name: Read CID
+        id: cid
+        run: |
+          echo "CID=$(cat last-ipfs-cid.txt)" >> $GITHUB_ENV
+
+      - name: Create GitHub Release with CID (optional)
+        uses: ncipollo/release-action@v1
+        with:
+          tag: "ipfs-${{ env.CID }}"
+          name: "IPFS mirror ${{ env.CID }}"
+          body: "IPFS CID for this commit: ${{ env.CID }}"
+
+      - name: Comment PR / Create issue with CID (optional)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const cid = process.env.CID;
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number || 1,
+              body: `✅ IPFS mirror deployed. CID: \`${cid}\` \n\nGateway: https://ipfs.io/ipfs/${cid}`
+            });
