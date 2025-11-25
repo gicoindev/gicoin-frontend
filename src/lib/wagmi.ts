@@ -4,28 +4,26 @@ import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { fallback, http } from "wagmi";
 import { bsc, bscTestnet } from "wagmi/chains";
 
+// PRIORITAS RPC (Mainnet)
 const MAINNET_RPC = [
   "https://bsc-dataseed.bnbchain.org",
   "https://bsc.blockpi.network/v1/rpc/public",
-  "https://bsc-mainnet.public.blastapi.io",
-  "https://bsc-dataseed1.binance.org",
-  "https://bsc-dataseed1.defibit.io",
   "https://bsc.publicnode.com",
+  "https://bsc-mainnet.public.blastapi.io",
 ];
 
+// Testnet (fallback only)
 const TESTNET_RPC = [
   "https://bsc-testnet.publicnode.com",
-  "https://endpoints.omniatech.io/v1/bsc/testnet/public",
   "https://data-seed-prebsc-1-s1.binance.org:8545",
 ];
 
-// 👇 FIX PENTING — HARUS AS CONST (tuple)
+// harus tuple
 const CHAINS = [bsc, bscTestnet] as const;
 
-// 👇 transports EXACT sesuai wagmi spec
 const TRANSPORTS = {
-  [bsc.id]: fallback(MAINNET_RPC.map((url) => http(url))),
-  [bscTestnet.id]: fallback(TESTNET_RPC.map((url) => http(url))),
+  [bsc.id]: fallback(MAINNET_RPC.map((u) => http(u))),
+  [bscTestnet.id]: fallback(TESTNET_RPC.map((u) => http(u))),
 };
 
 export const wagmiConfig = getDefaultConfig({

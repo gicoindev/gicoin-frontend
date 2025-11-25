@@ -21,9 +21,23 @@ export interface Proposal {
   voteCount: number;
 }
 
+// =======================
+//  BLOCK RANGE HELPER
+// =======================
+async function safeRange(client: any) {
+  const latest = await client.getBlockNumber();
+  const RANGE = 50000n; // max allowed for public BSC RPC
+
+  return {
+    from: latest > RANGE ? latest - RANGE : 0n,
+    to: latest,
+  };
+}
+
 export function useGovernance() {
   const { address } = useAccount();
-  const { createProposal, vote, closeVoting, executeProposal } = useGovernanceActions();
+  const { createProposal, vote, closeVoting, executeProposal } =
+    useGovernanceActions();
   const publicClient = usePublicClient()!;
   const { gicoin } = useContracts();
 
@@ -31,7 +45,8 @@ export function useGovernance() {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const toNum = (v: any) => (v !== undefined && v !== null ? Number(v.toString()) : 0);
+  const toNum = (v: any) =>
+    v !== undefined && v !== null ? Number(v.toString()) : 0;
 
   // ==========================================================
   // 📦 Load proposals
@@ -81,14 +96,16 @@ export function useGovernance() {
   };
 
   // ==========================================================
-  // 🧾 Load past events
+  // 🧾 Load PAST events — PATCHED (safe range)
   // ==========================================================
   const loadEvents = async () => {
     try {
+      const range = await safeRange(publicClient);
+
       const logs = await publicClient.getLogs({
         address: gicoin.address,
-        fromBlock: "earliest",
-        toBlock: "latest",
+        fromBlock: range.from,
+        toBlock: range.to,
       });
 
       const decoded = logs
@@ -108,30 +125,20 @@ export function useGovernance() {
   };
 
   // ==========================================================
-  // 🔁 Manual reload
-  // ==========================================================
-  const reloadProposalCount = async () => {
-    await loadProposals();
-  };
-
-  // ==========================================================
-  // 🕒 Initial load
+  // 🔄 Auto refresh (15s)
   // ==========================================================
   useEffect(() => {
     loadProposals();
     loadEvents();
   }, []);
 
-  // ==========================================================
-  // 🔄 Auto refresh (15s)
-  // ==========================================================
   useEffect(() => {
     const interval = setInterval(loadProposals, 15000);
     return () => clearInterval(interval);
   }, []);
 
   // ==========================================================
-  // 🔔 SHARED EVENT HANDLER (PATCHED)
+  // 🔔 Shared event handler
   // ==========================================================
   function handleEvent(logs: Log[]) {
     logs.forEach((log) => {
@@ -141,20 +148,22 @@ export function useGovernance() {
       }) as {
         eventName: string;
         args: Record<string, any>;
-      }; // ✅ FIX TypeScript
-  
+      };
+
       setEvents((prev) => [
         { type: decoded.eventName, detail: decoded, time: Date.now() },
         ...prev,
       ]);
-  
+
       switch (decoded.eventName) {
         case "ProposalCreated":
           toast.success(`📝 Proposal Created: ${decoded.args.description}`);
           break;
         case "Voted":
           toast(
-            `🗳️ Vote ${decoded.args.support ? "YES" : "NO"} by ${decoded.args.voter}`
+            `🗳️ Vote ${
+              decoded.args.support ? "YES" : "NO"
+            } by ${decoded.args.voter}`
           );
           break;
         case "VotingClosed":
@@ -172,13 +181,13 @@ export function useGovernance() {
           );
           break;
       }
-  
+
       loadProposals();
     });
   }
-  
+
   // ==========================================================
-  // 📡 4 STATIC WATCH HOOKS (PATCHED)
+  // 📡 Watch live events
   // ==========================================================
   useWatchContractEvent({
     address: gicoin.address,
@@ -218,7 +227,7 @@ export function useGovernance() {
     vote,
     closeVoting,
     executeProposal,
-    reloadProposalCount,
+    reloadProposalCount: loadProposals,
     loading,
     address,
   };

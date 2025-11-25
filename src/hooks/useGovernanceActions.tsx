@@ -6,9 +6,7 @@ import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import type { Abi, Hash } from "viem";
 import { useAccount, useChainId, useWriteContract } from "wagmi";
-import {
-  waitForTransactionReceipt,
-} from "wagmi/actions";
+import { waitForTransactionReceipt } from "wagmi/actions";
 
 export function useGovernanceActions() {
   const { address } = useAccount();
@@ -20,33 +18,24 @@ export function useGovernanceActions() {
   const [error, setError] = useState<string | null>(null);
 
   // ==========================================================
-  // 🌐 Explorer Auto Detect
+  // 🌐 Explorer Auto Detect (Mainnet First)
   // ==========================================================
   const explorers = {
-    56: "https://bscscan.com",
-    97: "https://testnet.bscscan.com",
-    1: "https://etherscan.io",
-    11155111: "https://sepolia.etherscan.io",
+    56: "https://bscscan.com/tx/",
+    97: "https://testnet.bscscan.com/tx/",
   } as const;
-  
-  const explorer =
-    explorers[chainId as keyof typeof explorers] ??
-    explorers[97];
-  
+
+  const explorer = explorers[chainId as keyof typeof explorers] ?? explorers[56];
 
   // ==========================================================
-  // 🔧 Generic TX Handler
+  // 🔧 Generic TX Handler (Production Safe)
   // ==========================================================
   const sendTx = useCallback(
-    async (
-      action: string,
-      functionName: string,
-      args: any[]
-    ): Promise<Hash> => {
+    async (action: string, functionName: string, args: any[]): Promise<Hash> => {
       setLoading(true);
       setError(null);
 
-      const toastId = toast.loading(`${action} pending...`);
+      const toastId = toast.loading(`${action}...`);
 
       try {
         // Send TX
@@ -57,18 +46,19 @@ export function useGovernanceActions() {
           args,
         });
 
-        // Wait confirmation
+        // Wait for blockchain confirmation
         await waitForTransactionReceipt(wagmiConfig, { hash });
 
         toast.success(
           <span>
-            ✅ {action} success!{" "}
+            ✅ {action} Berhasil —{" "}
             <a
               href={`${explorer}${hash}`}
               target="_blank"
+              rel="noopener noreferrer"
               className="underline text-blue-400"
             >
-              View Tx
+              Lihat TX
             </a>
           </span>,
           { id: toastId }
@@ -77,8 +67,6 @@ export function useGovernanceActions() {
         return hash;
       } catch (err: any) {
         const msg = err?.shortMessage || err?.message || "Transaction failed";
-        console.error(`❌ ${action} error:`, msg);
-
         toast.error(msg, { id: toastId });
         setError(msg);
         throw err;
@@ -93,26 +81,26 @@ export function useGovernanceActions() {
   // 🎯 Governance Functions
   // ==========================================================
   const createProposal = useCallback(
-    async (description: string): Promise<Hash> =>
-      sendTx("Create Proposal", "createProposal", [description]),
+    (description: string) =>
+      sendTx("Membuat Proposal", "createProposal", [description]),
     [sendTx]
   );
 
   const vote = useCallback(
-    async (proposalId: number, support: boolean): Promise<Hash> =>
-      sendTx("Vote", "vote", [BigInt(proposalId), support]),
+    (proposalId: number, support: boolean) =>
+      sendTx("Mengirim Vote", "vote", [BigInt(proposalId), support]),
     [sendTx]
   );
 
   const closeVoting = useCallback(
-    async (proposalId: number): Promise<Hash> =>
-      sendTx("Close Voting", "closeVoting", [BigInt(proposalId)]),
+    (proposalId: number) =>
+      sendTx("Menutup Voting", "closeVoting", [BigInt(proposalId)]),
     [sendTx]
   );
 
   const executeProposal = useCallback(
-    async (proposalId: number): Promise<Hash> =>
-      sendTx("Execute Proposal", "executeProposal", [BigInt(proposalId)]),
+    (proposalId: number) =>
+      sendTx("Eksekusi Proposal", "executeProposal", [BigInt(proposalId)]),
     [sendTx]
   );
 
