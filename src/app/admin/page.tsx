@@ -4,7 +4,7 @@ import { CardGold } from "@/components/ui/card-gold";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useContracts } from "@/config/contracts";
 import { useAdminStats } from "@/hooks/useAdminStats";
-import { useBlockNumber } from "wagmi";
+import { useAccount, useBlockNumber } from "wagmi";
 
 import AdminGovernance from "@/components/admin/AdminGovernance";
 import BlacklistManager from "@/components/admin/blacklistmanager";
@@ -16,6 +16,10 @@ import TaxRateForm from "@/components/admin/taxrateform";
 import WhitelistManager from "@/components/admin/whitelistmanager";
 
 export default function AdminPage() {
+  const { isConnected } = useAccount();
+  const { chainInfo } = useContracts();
+  const { data: blockNumber } = useBlockNumber({ watch: true });
+
   const {
     totalSupply,
     totalStaked,
@@ -26,8 +30,16 @@ export default function AdminPage() {
     loading,
   } = useAdminStats();
 
-  const { chainInfo } = useContracts();
-  const { data: blockNumber } = useBlockNumber({ watch: true });
+  if (!isConnected) {
+    return (
+      <div className="p-6 min-h-screen flex items-center justify-center">
+        <div className="text-center text-gray-400">
+          <h2 className="text-xl font-semibold">🔐 Admin Panel</h2>
+          <p className="mt-2">Hubungkan wallet untuk mengakses panel admin.</p>
+        </div>
+      </div>
+    );
+  }
 
   const circulating =
     totalSupply && totalStaked
@@ -40,14 +52,12 @@ export default function AdminPage() {
         🔐 Admin Panel
       </h2>
 
-      {/* Network Indicator */}
       <div className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-lg p-3 text-sm text-gray-400">
         <span title={chainInfo.explorer}>
           🌐 Connected to <strong>{chainInfo.name}</strong> ({chainInfo.symbol})
         </span>
         <span>
-          ⛓️ Block:{" "}
-          <strong>{blockNumber ? blockNumber.toString() : "—"}</strong>
+          ⛓️ Block: <strong>{blockNumber ? blockNumber.toString() : "—"}</strong>
         </span>
       </div>
 
@@ -61,7 +71,6 @@ export default function AdminPage() {
         </TabsList>
 
         <div className="mt-6">
-          {/* Dashboard */}
           <TabsContent value="dashboard">
             {loading ? (
               <CardGold title="Dashboard">

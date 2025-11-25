@@ -16,12 +16,16 @@ import { Toaster as SonnerToaster } from "sonner";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning className="dark">
       <body className={inter.className}>
         <Providers>
           <NavbarGold />
-          {children}
 
+          <main className="min-h-screen w-full">
+            {children}
+          </main>
+
+          {/* Global Toast Systems */}
           <SonnerToaster richColors position="top-center" />
           <ShadcnToaster />
           <HotToaster position="top-right" />

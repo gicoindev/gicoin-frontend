@@ -4,26 +4,25 @@ import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { fallback, http } from "wagmi";
 import { bsc, bscTestnet } from "wagmi/chains";
 
-// PRIORITAS RPC (Mainnet)
+// Pilihan RPC yang lebih stabil dan cukkup support CORS (no API key required)
 const MAINNET_RPC = [
+  // 1RPC and similar providers that are stable and commonly used
+  "https://1rpc.io/bnb",
+  "https://bsc-dataseed1.binance.org",
   "https://bsc-dataseed.bnbchain.org",
-  "https://bsc.blockpi.network/v1/rpc/public",
-  "https://bsc.publicnode.com",
-  "https://bsc-mainnet.public.blastapi.io",
 ];
 
-// Testnet (fallback only)
 const TESTNET_RPC = [
-  "https://bsc-testnet.publicnode.com",
-  "https://data-seed-prebsc-1-s1.binance.org:8545",
+  "https://bsc-testnet-rpc.publicnode.com",
+  "https://data-seed-prebsc-2-s1.binance.org:8545",
 ];
 
-// harus tuple
+// 👇 MUST be const tuple
 const CHAINS = [bsc, bscTestnet] as const;
 
 const TRANSPORTS = {
-  [bsc.id]: fallback(MAINNET_RPC.map((u) => http(u))),
-  [bscTestnet.id]: fallback(TESTNET_RPC.map((u) => http(u))),
+  [bsc.id]: fallback(MAINNET_RPC.map((url) => http(url))),
+  [bscTestnet.id]: fallback(TESTNET_RPC.map((url) => http(url))),
 };
 
 export const wagmiConfig = getDefaultConfig({

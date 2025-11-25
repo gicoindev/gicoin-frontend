@@ -39,8 +39,7 @@ export function useAirdropStatus() {
   const abortRef = useRef<AbortController | null>(null);
   const isMounted = useRef(true);
 
-  const backendBase =
-    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000";
+  const backendBase = process.env.NEXT_PUBLIC_BACKEND_URL!;
 
   // ====================================================
   // Backend Fetch

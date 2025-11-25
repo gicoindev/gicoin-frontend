@@ -1,5 +1,5 @@
 // ==========================================================
-// src/config/contracts.ts
+// src/config/contracts.ts (patched)
 // ==========================================================
 
 import GicoinAbi from "@/abis/Gicoin-latest.json";
@@ -17,14 +17,8 @@ import {
 import { wagmiConfig } from "@/lib/wagmi";
 import { useChainId } from "wagmi";
 
-// ==========================================================
-// ABI
-// ==========================================================
 export const GICOIN_ABI = GicoinAbi as Abi;
 
-// ==========================================================
-// Addresses
-// ==========================================================
 export const CONTRACT_ADDRESSES = {
   1: {
     gicoin: "0x0000000000000000000000000000000000000000",
@@ -56,9 +50,6 @@ export const CONTRACT_ADDRESSES = {
   },
 } as const;
 
-// ==========================================================
-// Chain Info
-// ==========================================================
 export const CHAIN_INFO = {
   1: { name: "Ethereum Mainnet", symbol: "ETH", explorer: "https://etherscan.io" },
   11155111: { name: "Sepolia Testnet", symbol: "ETH", explorer: "https://sepolia.etherscan.io" },
@@ -66,15 +57,9 @@ export const CHAIN_INFO = {
   56: { name: "BSC Mainnet", symbol: "BNB", explorer: "https://bscscan.com" },
 } as const;
 
-// ==========================================================
-// Default Chain
-// ==========================================================
 const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID || "56");
 const IS_MAINNET = CHAIN_ID === 56;
 
-// ==========================================================
-// useContracts()
-// ==========================================================
 export function useContracts() {
   const activeChainId = useChainId() || CHAIN_ID;
 
@@ -102,24 +87,19 @@ export function useContracts() {
   } as const;
 }
 
-// ==========================================================
-// Public Client
-// ==========================================================
+// Public client: gunakan RPC yang aman dan spesifik
 export const publicClient = createPublicClient({
   chain: IS_MAINNET ? bsc : bscTestnet,
-  transport: fallback([http()]),
+  transport: fallback([
+    http(IS_MAINNET ? "https://1rpc.io/bnb" : "https://bsc-testnet-rpc.publicnode.com"),
+  ]),
 });
 
-// ==========================================================
-// getWallet() — FIXED wagmi v2
-// ==========================================================
 export async function getWallet() {
   try {
-    // FIX #1 → getAccount(wagmiConfig)
     const account = getAccount(wagmiConfig);
     if (!account?.address) throw new Error("⚠ Wallet belum terhubung.");
 
-    // FIX #2 → getWalletClient(wagmiConfig)
     const client = await getWalletClient(wagmiConfig);
     if (!client) throw new Error("⚠ Tidak dapat membuat wallet client.");
 
@@ -127,7 +107,6 @@ export async function getWallet() {
     const targetChain = IS_MAINNET ? bsc.id : bscTestnet.id;
 
     if (currentChain !== targetChain) {
-      // FIX #3 → switchChain(wagmiConfig, {...})
       await switchChain(wagmiConfig, { chainId: targetChain });
       console.info("🔄 Chain switched automatically.");
     }
