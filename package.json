@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "export": "next export",
     "download-fonts": "node scripts/download-font.js",
     "postinstall": "npm run download-fonts",
     "lint": "eslint",
