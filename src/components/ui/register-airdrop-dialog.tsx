@@ -22,9 +22,9 @@ export function RegisterAirdropDialog({ open, onClose }: RegisterAirdropDialogPr
   const handleSubmit = async () => {
     if (!address) return alert("Connect wallet dulu");
     setLoading(true);
-
+  
     try {
-      const res = await fetch("http://localhost:4000/register", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -33,7 +33,7 @@ export function RegisterAirdropDialog({ open, onClose }: RegisterAirdropDialogPr
           chat_id: chatId || null,
         }),
       });
-
+  
       if (!res.ok) throw new Error("Register gagal");
       setSuccess(true);
     } catch (err) {
@@ -43,7 +43,7 @@ export function RegisterAirdropDialog({ open, onClose }: RegisterAirdropDialogPr
       setLoading(false);
     }
   };
-
+  
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md bg-gray-900 text-white">
