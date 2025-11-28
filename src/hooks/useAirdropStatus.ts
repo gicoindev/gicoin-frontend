@@ -19,8 +19,11 @@ type AirdropStatus = {
   loading: boolean;
 };
 
-export function useAirdropStatus() {
-  const { address } = useAccount();
+export function useAirdropStatus(addressArg?: string | null) {
+  // if addressArg provided, use it; otherwise fallback to connected account
+  const { address: accountAddress } = useAccount();
+  const address = addressArg ?? accountAddress ?? undefined;
+
   const { gicoin, rewardPoolWallet } = useContracts();
 
   const [status, setStatus] = useState<AirdropStatus>({
@@ -84,42 +87,41 @@ export function useAirdropStatus() {
             functionName: "hasClaimed",
             args: [addr],
           }) as Promise<boolean>,
-        
+
           readContract(wagmiConfig, {
             address: gicoin.address,
             abi: gicoin.abi,
             functionName: "balanceOf",
             args: [rewardPoolWallet],
           }) as Promise<bigint>,
-        
+
           readContract(wagmiConfig, {
             address: gicoin.address,
             abi: gicoin.abi,
             functionName: "airdropRegistered",
             args: [addr],
           }) as Promise<boolean>,
-        
+
           readContract(wagmiConfig, {
             address: gicoin.address,
             abi: gicoin.abi,
             functionName: "isWhitelisted",
             args: [addr],
           }) as Promise<boolean>,
-        
+
           readContract(wagmiConfig, {
             address: gicoin.address,
             abi: gicoin.abi,
             functionName: "decimals",
           }) as Promise<number>,
         ]);
-        
+
         return {
           claimed: claimedRaw,
           poolBalance: Number(formatUnits(poolBalanceRaw, decimalsRaw)),
           isRegistered: isRegisteredRaw,
           isWhitelisted: isWhitelistedRaw,
         };
-        
       } catch (err) {
         console.error("❌ Onchain fetch error:", err);
         return {
@@ -141,7 +143,7 @@ export function useAirdropStatus() {
 
     const now = Date.now();
     if (now - lastFetchRef.current < 4000) return;
-    if (document.hidden) return;
+    if (typeof document !== "undefined" && document.hidden) return;
 
     lastFetchRef.current = now;
     abortRef.current?.abort();

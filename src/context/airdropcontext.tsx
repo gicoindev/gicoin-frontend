@@ -13,7 +13,7 @@ type AirdropContextType = ReturnType<typeof useAirdropStatus> &
     address?: string;
     isConnected: boolean;
     isActive: boolean;
-    MERKLE_ROOT?: string; // ✅ tambahkan ke context
+    MERKLE_ROOT?: string;
   };
 
 const AirdropContext = createContext<AirdropContextType | null>(null);
@@ -23,63 +23,49 @@ export function AirdropProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [isActive, setIsActive] = useState(false);
 
-  // 🧩 Ambil MERKLE_ROOT dari .env
   const MERKLE_ROOT = process.env.NEXT_PUBLIC_ACTIVE_MERKLE_ROOT || "";
 
-  // 🧭 Deteksi halaman aktif
   useEffect(() => {
-    const active = pathname?.includes("/airdrop");
-    setIsActive(active);
-    console.log(`📍 AirdropContext active: ${active}`);
+    setIsActive(pathname?.includes("/airdrop") || false);
   }, [pathname]);
 
-  // 🧩 Debug info saat aktif
-  useEffect(() => {
-    if (isActive && MERKLE_ROOT) {
-      console.log(`🌿 Active Merkle Root: ${MERKLE_ROOT}`);
-    }
-  }, [isActive, MERKLE_ROOT]);
+  const shouldStart = Boolean(isConnected && address && isActive);
 
-  // 🔹 Hooks utama
-  const status = useAirdropStatus();
-  const actions = useAirdropActions(status.refetch);
-  const events = useAirdropEvents();
+  // Now pass optional args into hooks
+  const status = useAirdropStatus(shouldStart ? address : null);
+  const actions = useAirdropActions(shouldStart ? status.refetch : undefined);
+  const events = useAirdropEvents(shouldStart);
 
-  // ✅ Wrapper transaksi (auto refresh)
   const wrapAction = <T extends (...args: any[]) => Promise<any>>(fn: T) =>
     async (...args: Parameters<T>) => {
-      if (!isActive) return;
-      try {
-        const receipt = await fn(...args);
-        if (receipt?.status === "success") {
-          console.log("✅ TX success — refreshing status...");
-          await status.refetch?.();
-        }
-        return receipt;
-      } catch (err) {
-        console.error("❌ Airdrop action failed:", err);
-        throw err;
-      }
+      if (!shouldStart) return;
+      const receipt = await fn(...args);
+      if (receipt?.status === "success") await status.refetch?.();
+      return receipt;
     };
 
-  // 🧠 Gabungkan state + actions
   const value = useMemo(
     () => ({
-      address,
-      isConnected,
+      // Spread status/events/actions first so explicit fields below override them
       ...status,
       ...events,
       ...actions,
+
+      // then explicit top-level props (ensures no accidental overwrite)
+      address,
+      isConnected,
       isActive,
-      MERKLE_ROOT, // ✅ expose ke seluruh app
+      MERKLE_ROOT,
+
+      // wrapped actions
       register: wrapAction(actions.register),
       claimWithWhitelist: wrapAction(actions.claimWithWhitelist),
       claimWithMerkle: wrapAction(actions.claimWithMerkle),
     }),
+    // include everything we rely on
     [address, isConnected, isActive, MERKLE_ROOT, status, events, actions]
   );
 
-  // 🧹 Cleanup saat keluar halaman airdrop
   useEffect(() => {
     if (!isActive) {
       console.log("🧹 Leaving airdrop page — cleanup context");

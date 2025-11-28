@@ -9,22 +9,19 @@ import { toast } from "sonner";
 import { Log } from "viem";
 import { useWatchContractEvent } from "wagmi";
 
-export function useAirdropEvents() {
+export function useAirdropEvents(enabledOverride?: boolean) {
   const { gicoin } = useContracts();
   const pathname = usePathname();
-  const isActive = pathname?.includes("/airdrop"); // aktif hanya di halaman /airdrop
+  // allow caller to override isActive
+  const isActive = typeof enabledOverride === "boolean" ? enabledOverride : !!pathname?.includes("/airdrop");
 
   const [logs, setLogs] = useState<AirdropEvent[]>([]);
   const lastLogRef = useRef<string | null>(null);
   const lastUpdateRef = useRef(0);
 
-  // ==========================================================
-  // 🧠 Helper: aman untuk tambah log (anti spam & duplikat)
-  // ==========================================================
   const safeAddLog = useCallback((newLog: AirdropEvent) => {
     const now = Date.now();
 
-    // 🧱 Cooldown 3 detik per txHash
     if (
       newLog.txHash === lastLogRef.current &&
       now - lastUpdateRef.current < 3000
@@ -35,14 +32,11 @@ export function useAirdropEvents() {
     lastUpdateRef.current = now;
 
     setLogs((prev) => {
-      if (prev.some((l) => l.txHash === newLog.txHash)) return prev; // hindari duplikat
-      return [newLog, ...prev].slice(0, 100); // batasi maksimum 100 log (hemat memori)
+      if (prev.some((l) => l.txHash === newLog.txHash)) return prev;
+      return [newLog, ...prev].slice(0, 100);
     });
   }, []);
 
-  // ==========================================================
-  // 🪂 AirdropRegistered
-  // ==========================================================
   useWatchContractEvent({
     address: gicoin.address,
     abi: gicoin.abi,
@@ -62,9 +56,6 @@ export function useAirdropEvents() {
     },
   });
 
-  // ==========================================================
-  // 🎁 AirdropClaimed
-  // ==========================================================
   useWatchContractEvent({
     address: gicoin.address,
     abi: gicoin.abi,
@@ -72,7 +63,7 @@ export function useAirdropEvents() {
     enabled: isActive,
     onLogs(newLogs: readonly Log[]) {
       if (!isActive) return;
-    
+
       newLogs.forEach((log: Log) => {
         const { user, amount, merkleRoot } = (log as any).args;
         safeAddLog({
@@ -87,9 +78,6 @@ export function useAirdropEvents() {
     },
   });
 
-  // ==========================================================
-  // ❌ AirdropClaimFailed
-  // ==========================================================
   useWatchContractEvent({
     address: gicoin.address,
     abi: gicoin.abi,
@@ -97,7 +85,7 @@ export function useAirdropEvents() {
     enabled: isActive,
     onLogs(newLogs: readonly Log[]) {
       if (!isActive) return;
-    
+
       newLogs.forEach((log: Log) => {
         const { user, amount, failureReason } = (log as any).args;
         safeAddLog({
@@ -112,9 +100,6 @@ export function useAirdropEvents() {
     },
   });
 
-  // ==========================================================
-  // ⚠️ Contract Paused / Unpaused
-  // ==========================================================
   useWatchContractEvent({
     address: gicoin.address,
     abi: gicoin.abi,
@@ -122,16 +107,13 @@ export function useAirdropEvents() {
     enabled: isActive,
     onLogs(newLogs: readonly Log[]) {
       if (!isActive) return;
-    
+
       toast("⚠️ Contract Paused or Unpaused", {
         description: "Check admin dashboard for current status",
       });
     },
   });
 
-  // ==========================================================
-  // 🧹 Reset logs saat keluar dari halaman airdrop
-  // ==========================================================
   useEffect(() => {
     if (!isActive) {
       setLogs([]);
