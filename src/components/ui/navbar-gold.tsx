@@ -1,35 +1,17 @@
 "use client";
 
+import { useAutoSwitchChain } from "@/hooks/useAutoSwitchChain";
 import { cn } from "@/lib/utils";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useAccount, useSwitchChain } from "wagmi";
-
-interface ChainMeta {
-  [key: number]: string; // chainId -> logo path
-}
+import { useState } from "react";
 
 export default function NavbarGold() {
+  useAutoSwitchChain();
   const pathname = usePathname();
-  const { chain } = useAccount();
-  const { chains, switchChain } = useSwitchChain();
-  const [chainMeta, setChainMeta] = useState<ChainMeta>({});
   const [isOpen, setIsOpen] = useState(false);
-
-  const fallbackLogos: Record<number, string> = {
-    1: "/logos/ethereum.png",
-    56: "/logos/bnb.png",
-    137: "/logos/polygon.png",
-    10: "/logos/optimism.png",
-    42161: "/logos/arbitrum.png",
-  };
-
-  useEffect(() => {
-    setChainMeta(fallbackLogos);
-  }, []);
 
   const menuItems = [
     { href: "/", label: "Dashboard" },
@@ -41,6 +23,7 @@ export default function NavbarGold() {
 
   return (
     <nav className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-yellow-500/20 bg-black/80 backdrop-blur-md relative">
+      
       {/* Logo Brand */}
       <div className="text-xl sm:text-2xl font-extrabold text-yellow-400 tracking-wide">
         <Link href="/">Gicoin</Link>
@@ -64,7 +47,7 @@ export default function NavbarGold() {
         ))}
       </div>
 
-      {/* Right Section (Desktop only) */}
+      {/* Right Section */}
       <div className="hidden md:flex items-center gap-3">
         <ConnectButton.Custom>
           {({
@@ -121,7 +104,7 @@ export default function NavbarGold() {
         </ConnectButton.Custom>
       </div>
 
-      {/* Hamburger (Mobile only) */}
+      {/* Mobile Hamburger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="md:hidden text-yellow-400 focus:outline-none ml-auto text-2xl"
@@ -136,24 +119,22 @@ export default function NavbarGold() {
           isOpen ? "max-h-[600px] py-4" : "max-h-0 py-0"
         )}
       >
-        {/* Menu Items */}
         {menuItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             onClick={() => setIsOpen(false)}
             className={cn(
-              "transition-colors duration-200 text-yellow-400",
-              pathname === item.href ? "font-bold" : "text-zinc-400"
+              "transition-colors duration-200",
+              pathname === item.href ? "font-bold text-yellow-400" : "text-zinc-400 hover:text-yellow-400"
             )}
           >
             {item.label}
           </Link>
         ))}
 
-        <div className="border-t border-yellow-500/20 my-2"></div>
+        <div className="border-t border-yellow-500/20 my-2" />
 
-        {/* Wallet + Chain Selector (Mobile) */}
         <ConnectButton.Custom>
           {({
             account,
@@ -177,7 +158,6 @@ export default function NavbarGold() {
                   </button>
                 ) : (
                   <>
-                    {/* Chain Selector */}
                     <button
                       onClick={openChainModal}
                       className="flex items-center justify-between bg-gray-900 text-yellow-400 border border-yellow-500/30 rounded-lg px-3 py-2 w-full"
@@ -199,7 +179,6 @@ export default function NavbarGold() {
                       </svg>
                     </button>
 
-                    {/* Account */}
                     <button
                       onClick={openAccountModal}
                       className="w-full bg-yellow-400 hover:bg-yellow-500 text-black px-4 py-2 rounded-lg font-semibold transition"

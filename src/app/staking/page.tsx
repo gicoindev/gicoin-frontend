@@ -10,6 +10,7 @@ import { useStaking } from "@/hooks/useStaking";
 import { useStakingRewards } from "@/hooks/useStakingRewards";
 import { useTokenBalance } from "@/hooks/useTokenBalance";
 
+import { useAutoSwitchChain } from "@/hooks/useAutoSwitchChain";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useState } from "react";
 import { Toaster, toast } from "sonner";
@@ -21,6 +22,7 @@ import { useContracts } from "@/config/contracts";
 // 🚀 GIC Staking Page (Updated v5 — with new hooks)
 // ==========================================================
 export default function StakingPage() {
+  useAutoSwitchChain();
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
 

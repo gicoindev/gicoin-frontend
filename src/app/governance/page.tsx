@@ -5,9 +5,11 @@ import EventLog from "@/components/governance/eventlog";
 import ProposalDetail from "@/components/governance/proposaldetail";
 import ProposalList from "@/components/governance/proposallist";
 import { GovernanceProvider } from "@/context/governancecontext";
+import { useAutoSwitchChain } from "@/hooks/useAutoSwitchChain";
 import { useAccount } from "wagmi";
 
 export default function GovernancePage() {
+  useAutoSwitchChain();
   const { isConnected } = useAccount();
 
   // Jika belum connect, jangan load komponen yang fetch on-chain
