@@ -1,12 +1,10 @@
 "use client";
 
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import { fallback, http } from "wagmi";
+import { cookieStorage, createStorage, fallback, http } from "wagmi";
 import { bsc, bscTestnet } from "wagmi/chains";
 
-// Pilihan RPC yang lebih stabil dan cukkup support CORS (no API key required)
 const MAINNET_RPC = [
-  // 1RPC and similar providers that are stable and commonly used
   "https://1rpc.io/bnb",
   "https://bsc-dataseed1.binance.org",
   "https://bsc-dataseed.bnbchain.org",
@@ -17,7 +15,7 @@ const TESTNET_RPC = [
   "https://data-seed-prebsc-2-s1.binance.org:8545",
 ];
 
-// 👇 MUST be const tuple
+// MUST be const tuple
 const CHAINS = [bsc, bscTestnet] as const;
 
 const TRANSPORTS = {
@@ -30,4 +28,13 @@ export const wagmiConfig = getDefaultConfig({
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
   chains: CHAINS,
   transports: TRANSPORTS,
+
+  /*
+   * 🔥 FIX PENTING!
+   * Wagmi harus punya storage persist agar wallet tidak disconnect
+   */
+  ssr: false,
+  storage: createStorage({
+    storage: cookieStorage,
+  }),
 });
