@@ -97,14 +97,18 @@ export default function EventLog({ events, onRefresh }: EventLogProps) {
               {ev.txHash && (
                 <p className="break-all text-gray-300 text-xs mt-1">
                   Tx:{" "}
-                  <a
-                    href={getExplorerUrl(ev.txHash, chainId)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline text-blue-400"
-                  >
-                    {ev.txHash}
-                  </a>
+                  {getExplorerUrl(ev.txHash, chainId) ? (
+                    <a
+                      href={getExplorerUrl(ev.txHash, chainId)!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline text-blue-400"
+                    >
+                      {ev.txHash}
+                    </a>
+                  ) : (
+                    <span className="text-gray-500">{ev.txHash} (no explorer)</span>
+                  )}
                 </p>
               )}
 

@@ -9,11 +9,9 @@ import RegisterAirdrop from "@/components/airdrop/registerairdrop";
 import StatusPanel from "@/components/airdrop/statuspanel";
 import WalletInfo from "@/components/ui/walletinfo";
 import { AirdropProvider } from "@/context/airdropcontext"; // ✅ IMPORT
-import { useAutoSwitchChain } from "@/hooks/useAutoSwitchChain";
 import { useAccount } from "wagmi";
 
 export default function AirdropPage() {
-  useAutoSwitchChain();
   const { address } = useAccount();
   return (
     <AirdropProvider>

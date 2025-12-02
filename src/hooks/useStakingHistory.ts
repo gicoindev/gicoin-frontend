@@ -8,6 +8,7 @@ export interface HistoryItem {
   tx: string;
   action: "Stake" | "Unstake" | "Claim";
   amount: string;
+  reward?: string;
   date: string;
 }
 
@@ -19,22 +20,13 @@ export function useStakingHistory() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [endBlock, setEndBlock] = useState<bigint | null>(null); // blok terakhir yang sudah diambil
+  const [endBlock, setEndBlock] = useState<bigint | null>(null);
 
-  const CHUNK_SIZE = 5000n; // ambil 5.000 blok per halaman
-  // inside useStakingHistory()
+  const CHUNK_SIZE = 5000n;
 
-  // Dedupe: remove duplicates based on tx + action
   const dedupeHistory = (items: HistoryItem[]) => {
     const map = new Map<string, HistoryItem>();
-
-    for (const it of items) {
-      const key = `${it.tx}-${it.action}`;
-      if (!map.has(key)) {
-        map.set(key, it);
-      }
-    }
-
+    for (const it of items) map.set(`${it.tx}-${it.action}`, it);
     return Array.from(map.values());
   };
 
@@ -43,20 +35,18 @@ export function useStakingHistory() {
       if (!address || !publicClient || loading) return;
 
       setLoading(true);
+
       try {
         const latestBlock = await publicClient.getBlockNumber();
 
-        // hitung toBlock / fromBlock dengan benar bergantung apakah loadMore
-        const nextToBlock = isLoadMore
-          ? endBlock && endBlock > 0n
-            ? endBlock
-            : latestBlock
+        const toBlock = isLoadMore
+          ? endBlock ?? latestBlock
           : latestBlock;
 
-        const nextFromBlock = nextToBlock > CHUNK_SIZE ? nextToBlock - CHUNK_SIZE : 0n;
+        const fromBlock =
+          toBlock > CHUNK_SIZE ? toBlock - CHUNK_SIZE : 0n;
 
-        // jika kita sudah pada block 0 dan isLoadMore, stop
-        if (isLoadMore && nextToBlock === 0n) {
+        if (isLoadMore && toBlock === 0n) {
           setHasMore(false);
           return;
         }
@@ -68,7 +58,9 @@ export function useStakingHistory() {
           },
           {
             action: "Unstake" as const,
-            abi: parseAbiItem("event Unstaked(address indexed user, uint256 amount, uint256 reward)"),
+            abi: parseAbiItem(
+              "event Unstaked(address indexed user, uint256 amount, uint256 reward)"
+            ),
           },
           {
             action: "Claim" as const,
@@ -79,89 +71,91 @@ export function useStakingHistory() {
         let batch: HistoryItem[] = [];
 
         for (const e of events) {
+          let logs: Log[] = [];
+
           try {
-            const logs = await Promise.race([
+            logs = await Promise.race([
               publicClient.getLogs({
                 address: gicoin.address as Address,
                 event: e.abi,
-                fromBlock: nextFromBlock,
-                toBlock: nextToBlock,
+                fromBlock,
+                toBlock,
               }),
               new Promise<never>((_, reject) =>
-                setTimeout(() => reject(new Error("RPC Timeout")), 20000)
+                setTimeout(() => reject(new Error("RPC Timeout")), 16000)
               ),
             ]);
-
-            // decode each log and fetch block timestamp in parallel
-            const parsed = await Promise.all(
-              logs.map(async (log: Log) => {
-                try {
-                  const decoded = decodeEventLog({
-                    abi: [e.abi],
-                    data: log.data,
-                    topics: log.topics,
-                  });
-
-                  const user = (decoded.args as any)?.user?.toLowerCase?.();
-                  if (!user || user !== address?.toLowerCase()) return null;
-
-                  const amount = (decoded.args as any)?.amount as bigint;
-
-                  // get block timestamp for accurate date
-                  let timestamp = Date.now();
-                  try {
-                    if (log.blockNumber != null) {
-                      const block = await publicClient.getBlock({ blockNumber: log.blockNumber });
-                      timestamp = Number(block.timestamp) * 1000;
-                    }
-                  } catch (err) {
-                    console.warn("⚠️ getBlock timestamp failed for history log:", err);
-                  }
-
-                  return {
-                    tx: log.transactionHash ?? "",
-                    action: e.action,
-                    amount: (Number(amount) / 1e18).toFixed(2),
-                    date: new Date(timestamp).toLocaleString(),
-                  } as HistoryItem;
-                } catch {
-                  return null;
-                }
-              })
-            );
-
-            batch = [...batch, ...parsed.filter(Boolean) as HistoryItem[]];
           } catch (err) {
-            console.warn(`⚠️ Gagal ambil log ${e.action}`, err);
+            console.warn(`⚠️ Error fetching ${e.action} logs`, err);
+            continue;
           }
+
+          const parsed = await Promise.all(
+            logs.map(async (log) => {
+              try {
+                const decoded = decodeEventLog({
+                  abi: [e.abi],
+                  data: log.data,
+                  topics: log.topics,
+                });
+
+                const user = (decoded.args as any)?.user?.toLowerCase?.();
+                if (!user || user !== address.toLowerCase()) return null;
+
+                let amount = "0";
+                let reward: string | undefined;
+
+                if (e.action === "Unstake") {
+                  amount = (Number((decoded.args as any).amount) / 1e18).toFixed(2);
+                  reward = (Number((decoded.args as any).reward) / 1e18).toFixed(2);
+                } else {
+                  amount = (Number((decoded.args as any).amount) / 1e18).toFixed(2);
+                }
+
+                let timestamp = Date.now();
+                try {
+                  if (log.blockNumber != null) {
+                    const block = await publicClient.getBlock({
+                      blockNumber: log.blockNumber,
+                    });
+                    timestamp = Number(block.timestamp) * 1000;
+                  }
+                } catch {}
+
+                return {
+                  tx: log.transactionHash || "0x0",
+                  action: e.action,
+                  amount,
+                  reward,
+                  date: new Date(timestamp).toLocaleString(),
+                } as HistoryItem;
+              } catch {
+                return null;
+              }
+            })
+          );
+
+          batch.push(...(parsed.filter(Boolean) as HistoryItem[]));
         }
 
-        // jika tidak ada konten tambahan pada loadMore => tidak ada lebih lanjut
         if (batch.length === 0 && isLoadMore) {
           setHasMore(false);
           return;
         }
 
-        // sort by date descending (newest first)
-        const sortDesc = (arr: HistoryItem[]) =>
-          arr.sort((a, b) => (a.date < b.date ? 1 : -1));
-          
-          setHistory((prev) => {
-            const merged = isLoadMore ? [...prev, ...batch] : batch;
-            return sortDesc(dedupeHistory(merged));
-          });
-          
+        setHistory((prev) => {
+          const merged = isLoadMore ? [...prev, ...batch] : batch;
+          return dedupeHistory(
+            merged.sort((a, b) => (a.date < b.date ? 1 : -1))
+          );
+        });
 
-        // set endBlock untuk next pagination: nextFromBlock - 1
-        if (nextFromBlock > 0n) {
-          setEndBlock(nextFromBlock - 1n);
+        if (fromBlock > 0n) {
+          setEndBlock(fromBlock - 1n);
         } else {
-          // sudah mencapai genesis
           setEndBlock(0n);
           setHasMore(false);
         }
-      } catch (err) {
-        console.error("❌ Gagal ambil history:", err);
       } finally {
         setLoading(false);
       }
@@ -169,11 +163,10 @@ export function useStakingHistory() {
     [address, publicClient, gicoin, endBlock, loading]
   );
 
-  // 🔁 Ambil data pertama kali
+  // Fetch initial only when address changes
   useEffect(() => {
-    fetchHistory(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchHistory]);
+    if (address) fetchHistory(false);
+  }, [address]);
 
   return {
     history,

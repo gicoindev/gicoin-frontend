@@ -39,49 +39,54 @@ export default function StakingHistory({ history, loading, hasMore, loadMore }: 
               </tr>
             </thead>
             <tbody>
-              {history.map((tx, i) => (
-                <tr
-                  key={i}
-                  className="border-t border-gray-700 hover:bg-gray-700/20 transition"
-                >
-                  <td className="p-2 truncate">
-                    <a
-                      href={getExplorerUrl(tx.tx, chainId)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-yellow-400 hover:underline"
-                    >
-                      {tx.tx.slice(0, 6)}...{tx.tx.slice(-4)}
-                    </a>
-                  </td>
+            {history.map((tx, i) => {
+                const url = getExplorerUrl(tx.tx, chainId);
 
-                  <td className="p-2 flex items-center gap-2">
-                    {tx.action === "Stake" && (
-                      <>
-                        <ArrowUpCircle size={16} className="text-green-400" />
-                        <span className="text-green-400 font-semibold">Stake</span>
-                      </>
-                    )}
+                return (
+                  <tr key={i} className="border-t border-gray-700 hover:bg-gray-700/20 transition">
+                    <td className="p-2 truncate">
+                      {url ? (
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-yellow-400 hover:underline"
+                        >
+                          {tx.tx.slice(0, 6)}...{tx.tx.slice(-4)}
+                        </a>
+                      ) : (
+                        <span className="text-gray-500">
+                          {tx.tx.slice(0, 6)}...{tx.tx.slice(-4)} (no explorer)
+                        </span>
+                      )}
+                    </td>
 
-                    {tx.action === "Unstake" && (
-                      <>
-                        <ArrowDownCircle size={16} className="text-red-400" />
-                        <span className="text-red-400 font-semibold">Unstake</span>
-                      </>
-                    )}
+                    <td className="p-2 flex items-center gap-2">
+                      {tx.action === "Stake" && (
+                        <>
+                          <ArrowUpCircle size={16} className="text-green-400" />
+                          <span className="text-green-400 font-semibold">Stake</span>
+                        </>
+                      )}
+                      {tx.action === "Unstake" && (
+                        <>
+                          <ArrowDownCircle size={16} className="text-red-400" />
+                          <span className="text-red-400 font-semibold">Unstake</span>
+                        </>
+                      )}
+                      {tx.action === "Claim" && (
+                        <>
+                          <Gift size={16} className="text-yellow-400" />
+                          <span className="text-yellow-400 font-semibold">Claim</span>
+                        </>
+                      )}
+                    </td>
 
-                    {tx.action === "Claim" && (
-                      <>
-                        <Gift size={16} className="text-yellow-400" />
-                        <span className="text-yellow-400 font-semibold">Claim</span>
-                      </>
-                    )}
-                  </td>
-
-                  <td className="p-2">{tx.amount} GIC</td>
-                  <td className="p-2">{tx.date}</td>
-                </tr>
-              ))}
+                    <td className="p-2">{tx.amount} GIC</td>
+                    <td className="p-2">{tx.date}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
 
