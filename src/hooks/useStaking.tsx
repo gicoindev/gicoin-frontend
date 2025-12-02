@@ -25,8 +25,7 @@ import {
 // ============================================================
 async function safeRange(client: any) {
   const latest = await client.getBlockNumber();
-  const RANGE = 50000n; // Prevent RPC 400 block-limit error
-
+  const RANGE = 50000n;
   return {
     fromBlock: latest > RANGE ? latest - RANGE : 0n,
     toBlock: latest,
@@ -34,7 +33,7 @@ async function safeRange(client: any) {
 }
 
 // ============================================================
-// ⭐  useStaking Hook (Optimized & Mainnet-Ready)
+// ⭐  useStaking — FINAL VERSION
 // ============================================================
 export function useStaking() {
   const { address } = useAccount();
@@ -49,7 +48,6 @@ export function useStaking() {
   const [balance, setBalance] = useState("0");
   const [staked, setStaked] = useState("0");
   const [reward, setReward] = useState("0");
-  const [apr, setApr] = useState(60);
 
   const [eventsLog, setEventsLog] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -58,7 +56,7 @@ export function useStaking() {
   const refreshTimer = useRef<NodeJS.Timeout | null>(null);
 
   // ============================================================
-  // 📊 READ DATA FROM CONTRACT
+  // 📊 READ CONTRACT DATA
   // ============================================================
   const { data: totalStaked } = useReadContract({
     abi: gicoin.abi as Abi,
@@ -117,7 +115,7 @@ export function useStaking() {
   };
 
   // ============================================================
-  // ✍️ WRITE FUNCTIONS
+  // ✍️ WRITE: STAKE
   // ============================================================
   async function stake(amount: string | bigint): Promise<Hash> {
     if (!address) throw new Error("Wallet belum terhubung");
@@ -141,7 +139,6 @@ export function useStaking() {
             href={getExplorerUrl(hash, publicClient.chain?.id) || "#"}
             target="_blank"
             className="underline text-blue-400"
-            rel="noopener noreferrer"
           >
             Lihat TX
           </a>
@@ -149,8 +146,7 @@ export function useStaking() {
       );
 
       await publicClient.waitForTransactionReceipt({ hash });
-      await new Promise((r) => setTimeout(r, 1500));
-      await fetchData();
+      setTimeout(fetchData, 1500);
 
       return hash;
     } finally {
@@ -158,6 +154,9 @@ export function useStaking() {
     }
   }
 
+  // ============================================================
+  // ✍️ WRITE: UNSTAKE
+  // ============================================================
   async function unstake(amount?: string | bigint): Promise<Hash> {
     setLoading(true);
     try {
@@ -180,7 +179,6 @@ export function useStaking() {
             href={getExplorerUrl(hash, publicClient.chain?.id) || "#"}
             target="_blank"
             className="underline text-blue-400"
-            rel="noopener noreferrer"
           >
             Lihat TX
           </a>
@@ -188,8 +186,7 @@ export function useStaking() {
       );
 
       await publicClient.waitForTransactionReceipt({ hash });
-      await new Promise((r) => setTimeout(r, 1500));
-      await fetchData();
+      setTimeout(fetchData, 1500);
 
       return hash;
     } finally {
@@ -197,27 +194,54 @@ export function useStaking() {
     }
   }
 
-  async function claimReward(amount: string | bigint): Promise<Hash> {
+  // ============================================================
+  // ✍️ WRITE: CLAIM REWARD (ABI-CORRECT)
+  // ============================================================
+  async function claimReward(): Promise<Hash> {
     setLoading(true);
-    try {
-      const claimValue =
-        typeof amount === "string" ? parseEther(amount) : amount;
 
+    try {
+      if (!address) throw new Error("Wallet belum terhubung");
+
+      // Read reward data
+      const [rewardRaw, claimedRaw] = await Promise.all([
+        publicClient.readContract({
+          address: gicoin.address,
+          abi: gicoin.abi as Abi,
+          functionName: "calculateReward",
+          args: [address],
+        }) as Promise<bigint>,
+
+        publicClient.readContract({
+          address: gicoin.address,
+          abi: gicoin.abi as Abi,
+          functionName: "stakingReward",
+          args: [address],
+        }) as Promise<bigint>,
+      ]);
+
+      const remaining =
+        rewardRaw > claimedRaw ? rewardRaw - claimedRaw : 0n;
+
+      if (remaining === 0n) {
+        throw new Error("Tidak ada reward yang bisa di-claim.");
+      }
+
+      // Claim must use claimReward(uint256 amount)
       const hash = await writeContractAsync({
         address: gicoin.address,
         abi: gicoin.abi as Abi,
         functionName: "claimReward",
-        args: [claimValue],
+        args: [remaining],
       });
 
       toast.success(
         <span>
-          🎉 Reward berhasil!{" "}
+          🎉 Reward berhasil di-claim!{" "}
           <a
             href={getExplorerUrl(hash, publicClient.chain?.id) || "#"}
             target="_blank"
             className="underline text-blue-400"
-            rel="noopener noreferrer"
           >
             Lihat TX
           </a>
@@ -225,8 +249,7 @@ export function useStaking() {
       );
 
       await publicClient.waitForTransactionReceipt({ hash });
-      await new Promise((r) => setTimeout(r, 1500));
-      await fetchData();
+      setTimeout(fetchData, 1500);
 
       return hash;
     } finally {
@@ -277,17 +300,12 @@ export function useStaking() {
   };
 
   // ============================================================
-  // 🔎 LIVE EVENT WATCHER
+  // 🔎 LIVE EVENTS WATCHER
   // ============================================================
   useEffect(() => {
     if (!address || !gicoin?.address) return;
 
-    const eventNames = [
-      "Staked",
-      "Unstaked",
-      "RewardClaimed",
-      "RewardCalculated",
-    ];
+    const eventNames = ["Staked", "Unstaked", "RewardClaimed"];
 
     const unsubscribers: (() => void)[] = [];
     let reconnectTimer: NodeJS.Timeout;
@@ -303,7 +321,7 @@ export function useStaking() {
               const filtered = logs.filter((log: any) => {
                 const userArg =
                   log.args?.user ||
-                  log.args?.User ||
+                  log.args?.staker ||
                   log.args?.account ||
                   log.args?.[0] ||
                   null;
@@ -327,7 +345,7 @@ export function useStaking() {
 
           unsubscribers.push(unsubscribe);
         });
-      } catch (err) {
+      } catch {
         reconnectTimer = setTimeout(setupWatcher, 5000);
       }
     };
@@ -341,7 +359,7 @@ export function useStaking() {
   }, [address, gicoin.address, publicClient]);
 
   // ============================================================
-  // 🕑 LOAD PAST EVENTS (SAFE RANGE)
+  // 🕑 LOAD PAST EVENTS
   // ============================================================
   useEffect(() => {
     const loadPast = async () => {
@@ -382,13 +400,12 @@ export function useStaking() {
   }, [address]);
 
   // ============================================================
-  // 📦 RETURN FINAL API
+  // 📦 RETURN
   // ============================================================
   return {
     balance,
     staked,
     reward,
-    apr,
     totalStaked,
     rewardPool,
     rewardRate,

@@ -51,7 +51,7 @@ export function useStakingRewards() {
   });
 
   return {
-    rewardRate: rewardRate ? Number(rewardRate) : 0,
+    rewardRate: rewardRate ? rewardRate.toString() : "0",
     rewardPool: rewardPool ? formatEther(rewardPool as bigint) : "0",
     minStake: minStake ? formatEther(minStake as bigint) : "0",
     lastClaimed: lastClaimed ? Number(lastClaimed) : 0,

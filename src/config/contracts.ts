@@ -51,10 +51,10 @@ export const CONTRACT_ADDRESSES = {
 } as const;
 
 export const CHAIN_INFO = {
-  1: { name: "Ethereum Mainnet", symbol: "ETH", explorer: "https://etherscan.io" },
-  11155111: { name: "Sepolia Testnet", symbol: "ETH", explorer: "https://sepolia.etherscan.io" },
-  97: { name: "BSC Testnet", symbol: "tBNB", explorer: "https://testnet.bscscan.com" },
-  56: { name: "BSC Mainnet", symbol: "BNB", explorer: "https://bscscan.com" },
+  1: { id: 1, name: "Ethereum Mainnet", symbol: "ETH", explorer: "https://etherscan.io" },
+  11155111: { id: 11155111, name: "Sepolia Testnet", symbol: "ETH", explorer: "https://sepolia.etherscan.io" },
+  97: { id: 97, name: "BSC Testnet", symbol: "tBNB", explorer: "https://testnet.bscscan.com" },
+  56: { id: 56, name: "BSC Mainnet", symbol: "BNB", explorer: "https://bscscan.com" },
 } as const;
 
 const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID || "56");
@@ -107,10 +107,14 @@ export async function getWallet() {
     const targetChain = IS_MAINNET ? bsc.id : bscTestnet.id;
 
     if (currentChain !== targetChain) {
-      await switchChain(wagmiConfig, { chainId: targetChain });
-      console.info("🔄 Chain switched automatically.");
+      try {
+        switchChain(wagmiConfig, { chainId: targetChain });
+        console.info("🔄 Chain switched automatically.");
+      } catch (err) {
+        console.warn("⚠ User rejected chain switch.");
+      }
     }
-
+    
     return { account, client };
   } catch (err) {
     console.error("❌ getWallet() error:", err);

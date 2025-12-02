@@ -15,8 +15,9 @@ export function useTokenBalance(
     functionName: "balanceOf",
     args: address ? [address] : undefined,
     query: { enabled: !!address },
+    scopeKey: address ? `tokenBalance-${tokenAddress}-${address}` : undefined,
   });
-
+  
   return {
     balance: data ? formatEther(data as bigint) : "0",
     rawBalance: data as bigint | undefined,

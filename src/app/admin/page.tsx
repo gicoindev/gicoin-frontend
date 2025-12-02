@@ -14,10 +14,8 @@ import RewardPoolManager from "@/components/admin/rewardpoolmanager";
 import SystemControl from "@/components/admin/systemcontrol";
 import TaxRateForm from "@/components/admin/taxrateform";
 import WhitelistManager from "@/components/admin/whitelistmanager";
-import { useAutoSwitchChain } from "@/hooks/useAutoSwitchChain";
 
 export default function AdminPage() {
-  useAutoSwitchChain();
   const { isConnected } = useAccount();
   const { chainInfo } = useContracts();
   const { data: blockNumber } = useBlockNumber({ watch: true });

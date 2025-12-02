@@ -1,6 +1,5 @@
 "use client";
 
-import { useAutoSwitchChain } from "@/hooks/useAutoSwitchChain";
 import { cn } from "@/lib/utils";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Image from "next/image";
@@ -9,7 +8,6 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 export default function NavbarGold() {
-  useAutoSwitchChain();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
 

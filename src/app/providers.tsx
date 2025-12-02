@@ -19,19 +19,17 @@ function AutoSwitchChain() {
 
   useEffect(() => {
     if (!isConnected) return;
-
-    // Sudah di chain BSC → aman
     if (chainId === bsc.id) return;
 
-    const run = async () => {
+    const doSwitch = async () => {
       try {
         await switchChain({ chainId: bsc.id });
       } catch (err) {
-        console.warn("User rejected chain switch / wallet blocked");
+        console.warn("User rejected chain switch / blocked by wallet");
       }
     };
 
-    run();
+    doSwitch();
   }, [isConnected, chainId, switchChain]);
 
   return null;
