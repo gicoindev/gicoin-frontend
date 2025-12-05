@@ -13,7 +13,7 @@ function StatusBadge({
   falseText: string;
   color: "green" | "yellow" | "blue" | "red";
 }) {
-  const colorMap: Record<string, string> = {
+  const colors: Record<string, string> = {
     green: "bg-green-900 text-green-300",
     yellow: "bg-yellow-900 text-yellow-300",
     blue: "bg-blue-900 text-blue-300",
@@ -23,7 +23,7 @@ function StatusBadge({
   return (
     <span
       className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-        active ? colorMap[color] : "bg-neutral-800 text-neutral-400"
+        active ? colors[color] : "bg-neutral-800 text-neutral-400"
       }`}
     >
       {active ? `✅ ${trueText}` : `❌ ${falseText}`}
@@ -63,7 +63,7 @@ export default function StatusPanel() {
             <span className="font-mono text-neutral-300">{address}</span>
           </div>
 
-          {/* Eligible */}
+          {/* Eligibility */}
           <div className="flex justify-between items-center text-sm">
             <span>Eligible for Airdrop</span>
             <StatusBadge
@@ -99,19 +99,14 @@ export default function StatusPanel() {
           {/* Claimed */}
           <div className="flex justify-between items-center text-sm">
             <span>Already Claimed</span>
-            <StatusBadge
-              active={claimed}
-              trueText="Yes"
-              falseText="No"
-              color="red"
-            />
+            <StatusBadge active={claimed} trueText="Yes" falseText="No" color="red" />
           </div>
 
-          {/* Claimable Amount */}
+          {/* Amount */}
           <div className="flex justify-between items-center text-sm">
             <span>Claimable Amount</span>
             <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-900 text-green-300">
-              {Number(amount).toLocaleString()} GIC
+              {String(amount).replace(/\.0$/, "")} GIC
             </span>
           </div>
 
@@ -123,7 +118,7 @@ export default function StatusPanel() {
             </span>
           </div>
 
-          {/* Proof Debug */}
+          {/* Proof */}
           {eligible && proof.length > 0 && (
             <details className="mt-2 bg-neutral-800 rounded p-2 text-xs text-neutral-400">
               <summary className="cursor-pointer text-neutral-300">
