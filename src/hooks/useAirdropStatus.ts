@@ -20,9 +20,8 @@ type AirdropStatus = {
 };
 
 export function useAirdropStatus(addressArg?: string | null) {
-  // if addressArg provided, use it; otherwise fallback to connected account
-  const { address: accountAddress } = useAccount();
-  const address = addressArg ?? accountAddress ?? undefined;
+  const { address: wallet } = useAccount();
+  const address = addressArg ?? wallet ?? undefined;
 
   const { gicoin, rewardPoolWallet } = useContracts();
 
@@ -45,7 +44,22 @@ export function useAirdropStatus(addressArg?: string | null) {
   const backendBase = process.env.NEXT_PUBLIC_BACKEND_URL!;
 
   // ====================================================
-  // Backend Fetch
+  // 1️⃣ Load local proof from /public/proofs (no cache)
+  // ====================================================
+  async function loadLocalProof(addr: string) {
+    try {
+      const res = await fetch(`/proofs/${addr.toLowerCase()}.json`, {
+        cache: "no-store",
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  }
+
+  // ====================================================
+  // 2️⃣ Backend fetch
   // ====================================================
   const fetchBackendStatus = useCallback(
     async (addr: string) => {
@@ -55,6 +69,7 @@ export function useAirdropStatus(addressArg?: string | null) {
 
         const res = await fetch(`${backendBase}/airdrop/status/${addr}`, {
           signal: controller.signal,
+          cache: "no-store",
         });
 
         if (!res.ok) throw new Error(`Backend error ${res.status}`);
@@ -69,7 +84,7 @@ export function useAirdropStatus(addressArg?: string | null) {
   );
 
   // ====================================================
-  // Onchain Fetch (VIEM)
+  // 3️⃣ On-chain fetch
   // ====================================================
   const fetchOnchainStatus = useCallback(
     async (addr: string) => {
@@ -136,51 +151,68 @@ export function useAirdropStatus(addressArg?: string | null) {
   );
 
   // ====================================================
-  // Combine backend + onchain
+  // 4️⃣ MASTER FETCH → local → backend → onchain
   // ====================================================
   const fetchStatus = useCallback(async () => {
     if (!address || !isMounted.current) return;
 
     const now = Date.now();
-    if (now - lastFetchRef.current < 4000) return;
+    if (now - lastFetchRef.current < 3500) return;
     if (typeof document !== "undefined" && document.hidden) return;
-
     lastFetchRef.current = now;
+
     abortRef.current?.abort();
 
     setStatus((prev) => ({ ...prev, loading: true }));
 
     try {
-      const [backendData, onchainData] = await Promise.all([
-        fetchBackendStatus(address),
-        fetchOnchainStatus(address),
-      ]);
+      // Step 1: Local file (fastest)
+      const local = await loadLocalProof(address);
+
+      // Step 2: Backend (fallback)
+      const backend = await fetchBackendStatus(address);
+
+      // Step 3: On-chain
+      const onchain = await fetchOnchainStatus(address);
 
       if (!isMounted.current) return;
 
-      setStatus((prev) => ({
-        ...prev,
+      const finalAmount =
+        local?.amount ??
+        backend?.amount ??
+        "0";
+
+      const finalProof =
+        local?.proof?.length
+          ? local.proof
+          : backend?.proof?.length
+          ? backend.proof
+          : [];
+
+      const finalEligible = finalProof.length > 0;
+
+      setStatus({
         address,
-        eligible: backendData?.eligible ?? prev.eligible,
-        claimed: onchainData.claimed,
-        poolBalance: onchainData.poolBalance,
-        amount: backendData?.amount ?? prev.amount,
-        proof: backendData?.proof?.length ? backendData.proof : prev.proof,
-        isRegistered: onchainData.isRegistered,
-        isWhitelisted: onchainData.isWhitelisted,
+        eligible: finalEligible,
+        claimed: onchain.claimed,
+        poolBalance: onchain.poolBalance,
+        amount: finalAmount,
+        proof: finalProof,
+        isRegistered: onchain.isRegistered,
+        isWhitelisted: onchain.isWhitelisted,
         loading: false,
-      }));
+      });
 
       setError(null);
     } catch (err: any) {
-      console.error("❌ useAirdropStatus error:", err);
+      console.error("❌ Status fetch error:", err);
       setError(err.message);
       setStatus((prev) => ({ ...prev, loading: false }));
     }
   }, [address, fetchBackendStatus, fetchOnchainStatus]);
 
   // ====================================================
-  // Mount / Unmount
+  // Mount/Unmount
   // ====================================================
   useEffect(() => {
     isMounted.current = true;
@@ -190,7 +222,7 @@ export function useAirdropStatus(addressArg?: string | null) {
     };
   }, []);
 
-  // Auto refetch on address change
+  // Refetch when address changes
   useEffect(() => {
     if (!address) {
       setStatus((prev) => ({ ...prev, loading: false }));
@@ -200,7 +232,7 @@ export function useAirdropStatus(addressArg?: string | null) {
   }, [address, fetchStatus]);
 
   // ====================================================
-  // Watch Events
+  // Watch Contract Events → auto refetch
   // ====================================================
   useWatchContractEvent({
     address: gicoin.address,
@@ -216,9 +248,7 @@ export function useAirdropStatus(addressArg?: string | null) {
     onLogs: () => fetchStatus(),
   });
 
-  // ====================================================
   // Reset on disconnect
-  // ====================================================
   useEffect(() => {
     if (!address && isMounted.current) {
       setStatus({

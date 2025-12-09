@@ -36,7 +36,9 @@ export default function ClaimAirdrop() {
   const { address } = useAccount();
   const chainId = useChainId();
 
-  const [method, setMethod] = useState<"Whitelist" | "Merkle" | "Admin">("Whitelist");
+  const [method, setMethod] = useState<"Whitelist" | "Merkle" | "Admin">(
+    "Whitelist"
+  );
   const [manualAmount, setManualAmount] = useState("");
   const [manualProof, setManualProof] = useState("");
   const [claimedLocal, setClaimedLocal] = useState(false);
@@ -44,22 +46,22 @@ export default function ClaimAirdrop() {
   const proofToastShown = useRef(false);
 
   // ================================
-  // Auto-load proof + amount from backend
+  // Auto-load local/backend proof
   // ================================
   useEffect(() => {
     if (proof.length > 0 && !proofToastShown.current) {
       setManualProof(proof.join(", "));
-      if (amount !== "0") toast.success("✅ Proof loaded from backend!");
+
+      if (amount !== "0")
+        toast.success("📦 Merkle proof loaded automatically");
+
       proofToastShown.current = true;
     }
   }, [proof, amount]);
 
-  // ================================
-  // Display amount (backend gives plain "100")
-  // ================================
   const displayAmount =
     method === "Merkle" && (eligible || Number(amount) > 0)
-      ? amount // already plain number
+      ? amount
       : manualAmount;
 
   const displayProof = manualProof;
@@ -85,18 +87,18 @@ export default function ClaimAirdrop() {
     (method === "Merkle" && parsedProof.length === 0);
 
   // ================================
-  // MAIN CLAIM HANDLER
+  // CLAIM HANDLER
   // ================================
   const handleClaim = async () => {
     if (!isConnected) return toast.error("❌ Wallet not connected");
-    if (isClaimed) return toast.info("Already claimed!");
+    if (isClaimed) return toast.info("✔ Already claimed");
 
     const parsedAmount =
       displayAmount && displayAmount !== "0"
         ? parseUnits(displayAmount as `${number}`, 18)
         : 0n;
 
-    const toastId = toast.loading("Claiming airdrop...");
+    const toastId = toast.loading("Processing claim...");
 
     try {
       let receipt;
@@ -104,20 +106,26 @@ export default function ClaimAirdrop() {
       if (method === "Whitelist") {
         receipt = await claimWithWhitelist(parsedAmount);
       } else if (method === "Merkle") {
-        receipt = await claimWithMerkle(parsedAmount, parsedProof as `0x${string}`[]);
+        receipt = await claimWithMerkle(
+          parsedAmount,
+          parsedProof as `0x${string}`[]
+        );
       } else {
         receipt = await register();
       }
 
       toast.success(
         <span>
-          ✅ Claimed successfully!{" "}
+          🎉 Claimed successfully!{" "}
           <a
-            href={getExplorerTxUrl(chainId, (receipt as any).transactionHash || (receipt as any).hash)}
+            href={getExplorerTxUrl(
+              chainId,
+              (receipt as any).transactionHash || (receipt as any).hash
+            )}
             target="_blank"
             className="underline text-blue-400"
           >
-            View TX
+            View Transaction
           </a>
         </span>,
         { id: toastId }
@@ -127,7 +135,9 @@ export default function ClaimAirdrop() {
       setTimeout(() => refetch?.(), 1500);
     } catch (err: any) {
       console.error("❌ Claim error:", err);
-      toast.error(err?.shortMessage || err?.message || "Claim failed ❌", { id: toastId });
+      toast.error(err?.shortMessage || err?.message || "Claim failed ❌", {
+        id: toastId,
+      });
     }
   };
 
@@ -135,20 +145,22 @@ export default function ClaimAirdrop() {
   // UI RENDER
   // ================================
   return (
-    <div className="bg-neutral-900 p-4 rounded-2xl shadow-md space-y-3">
-      <h2 className="font-semibold text-lg">🪂 Claim Airdrop</h2>
+    <div className="bg-neutral-900 p-5 rounded-2xl shadow-lg space-y-4 border border-neutral-800">
+      <h2 className="font-semibold text-lg mb-1">🪂 Claim Airdrop</h2>
 
       {!isConnected ? (
-        <p className="text-gray-400">Connect wallet to claim</p>
+        <p className="text-gray-400">Connect wallet to continue</p>
       ) : isClaimed ? (
-        <p className="text-green-400 font-medium">✅ You have already claimed!</p>
+        <p className="text-green-400 font-medium">
+          ✅ You have already claimed your reward!
+        </p>
       ) : (
         <>
-          {/* Select Method */}
+          {/* Method Selector */}
           <select
             value={method}
             onChange={(e) => setMethod(e.target.value as any)}
-            className="w-full p-2 rounded bg-neutral-800"
+            className="w-full p-3 rounded-xl bg-neutral-800 border border-neutral-700 focus:outline-none"
           >
             <option value="Whitelist">Whitelist</option>
             <option value="Merkle">Merkle Proof</option>
@@ -162,34 +174,35 @@ export default function ClaimAirdrop() {
             value={displayAmount}
             onChange={(e) => setManualAmount(e.target.value)}
             disabled={method === "Merkle" && proof.length > 0}
-            className="w-full p-2 rounded bg-neutral-800"
+            className="w-full p-3 rounded-xl bg-neutral-800 border border-neutral-700 focus:outline-none"
           />
 
           {/* Proof */}
           {method === "Merkle" && (
             <textarea
-              rows={5}
-              placeholder="Proof"
+              rows={4}
+              placeholder="Merkle Proof list"
               value={displayProof}
               onChange={(e) => setManualProof(e.target.value)}
               disabled={method === "Merkle" && proof.length > 0}
-              className="w-full p-2 rounded bg-neutral-800 font-mono text-xs"
+              className="w-full p-3 rounded-xl bg-neutral-800 border border-neutral-700 font-mono text-xs focus:outline-none"
             />
           )}
 
-          {/* Button */}
+          {/* Claim Button */}
           <button
             onClick={handleClaim}
             disabled={isBtnDisabled}
-            className={`w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 ${
-              isBtnDisabled
-                ? "bg-gray-700 text-gray-300 cursor-not-allowed"
-                : "bg-green-500 text-black hover:bg-green-600 hover:text-white"
-            }`}
+            className={`w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all
+              ${
+                isBtnDisabled
+                  ? "bg-neutral-700 text-neutral-400 cursor-not-allowed"
+                  : "bg-green-500 text-black hover:bg-green-600 hover:shadow-lg"
+              }`}
           >
             {loading ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" /> Claiming...
+                <Loader2 className="w-4 h-4 animate-spin" /> Processing...
               </>
             ) : (
               "Claim Airdrop"
