@@ -9,7 +9,6 @@ import { bsc, bscTestnet } from "viem/chains";
 
 // Wagmi v2 actions
 import { wagmiConfig } from "@/lib/wagmi";
-import { useChainId } from "wagmi";
 import { getAccount, getWalletClient } from "wagmi/actions";
 
 export const GICOIN_ABI = GicoinAbi as Abi;
@@ -49,12 +48,11 @@ const ACTIVE_CHAIN = CHAIN_ID === 97 ? bscTestnet : bsc;
 // HOOK: useContracts()
 // -----------------------------------------------------------
 export function useContracts() {
-  const walletChainId = useChainId();
+  // ❌ Hapus ini (memicu bug Wrong Network)
+  // const walletChainId = useChainId();
 
-  // 🟢 urutan prioritas:
-  //    - jika wallet sedang di chain tertentu → pakai itu
-  //    - jika belum connect → pakai chain dari ENV
-  const activeChainId = walletChainId || CHAIN_ID;
+  // ✅ ENV selalu prioritas
+  const activeChainId = CHAIN_ID;
 
   const selected = CONTRACT_ADDRESSES[activeChainId as 97 | 56];
   const chainInfo = CHAIN_INFO[activeChainId as 97 | 56];
@@ -101,13 +99,17 @@ export async function getWallet() {
     const currentChain = client.chain?.id;
     const expectedChain = ACTIVE_CHAIN.id;
 
-    // ❗ Tidak ada auto-switch di sini
     if (currentChain !== expectedChain) {
-      console.warn(
-        `⚠ Chain mismatch. Wallet=${currentChain}, ENV=${expectedChain}`
-      );
+      try {
+        await client.switchChain({ id: expectedChain });
+      } catch (err) {
+        console.error("❌ Auto switch gagal:", err);
+        throw new Error(
+          `Wrong network. Please switch wallet to ${ACTIVE_CHAIN.name}`
+        );
+      }
     }
-
+    
     return { account, client };
   } catch (err) {
     console.error("❌ getWallet() error:", err);
