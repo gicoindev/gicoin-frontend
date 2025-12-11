@@ -1,5 +1,5 @@
 // ==========================================================
-// src/config/contracts.ts (patched)
+// src/config/contracts.ts (FINAL PATCH)
 // ==========================================================
 
 import GicoinAbi from "@/abis/Gicoin-latest.json";
@@ -8,32 +8,16 @@ import { createPublicClient, fallback, http } from "viem";
 import { bsc, bscTestnet } from "viem/chains";
 
 // Wagmi v2 actions
-import {
-  getAccount,
-  getWalletClient,
-  switchChain,
-} from "wagmi/actions";
-
 import { wagmiConfig } from "@/lib/wagmi";
 import { useChainId } from "wagmi";
+import { getAccount, getWalletClient } from "wagmi/actions";
 
 export const GICOIN_ABI = GicoinAbi as Abi;
 
+// -----------------------------------------------------------
+// CONTRACT ADDRESS LIST
+// -----------------------------------------------------------
 export const CONTRACT_ADDRESSES = {
-  1: {
-    gicoin: "0x0000000000000000000000000000000000000000",
-    staking: "0x0000000000000000000000000000000000000000",
-    rewardPool: "0x0000000000000000000000000000000000000000",
-    admin: "0x0000000000000000000000000000000000000000",
-    taxWallet: "0x0000000000000000000000000000000000000000",
-  },
-  11155111: {
-    gicoin: "0x0000000000000000000000000000000000000000",
-    staking: "0x0000000000000000000000000000000000000000",
-    rewardPool: "0x0000000000000000000000000000000000000000",
-    admin: "0x0000000000000000000000000000000000000000",
-    taxWallet: "0x0000000000000000000000000000000000000000",
-  },
   97: {
     gicoin: "0x7c2aa941970f29d3f0df35262dec8ec59583bc2d",
     staking: "0x7c2aa941970f29d3f0df35262dec8ec59583bc2d",
@@ -51,50 +35,61 @@ export const CONTRACT_ADDRESSES = {
 } as const;
 
 export const CHAIN_INFO = {
-  1: { id: 1, name: "Ethereum Mainnet", symbol: "ETH", explorer: "https://etherscan.io" },
-  11155111: { id: 11155111, name: "Sepolia Testnet", symbol: "ETH", explorer: "https://sepolia.etherscan.io" },
   97: { id: 97, name: "BSC Testnet", symbol: "tBNB", explorer: "https://testnet.bscscan.com" },
   56: { id: 56, name: "BSC Mainnet", symbol: "BNB", explorer: "https://bscscan.com" },
 } as const;
 
-const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID || "56");
-const IS_MAINNET = CHAIN_ID === 56;
+// -----------------------------------------------------------
+// ENV-driven chain selection (🔥 akar fix utama)
+// -----------------------------------------------------------
+const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID); // 97 or 56
+const ACTIVE_CHAIN = CHAIN_ID === 97 ? bscTestnet : bsc;
 
+// -----------------------------------------------------------
+// HOOK: useContracts()
+// -----------------------------------------------------------
 export function useContracts() {
-  const activeChainId = useChainId() || CHAIN_ID;
+  const walletChainId = useChainId();
 
-  const selected =
-    CONTRACT_ADDRESSES[activeChainId as keyof typeof CONTRACT_ADDRESSES] ??
-    CONTRACT_ADDRESSES[56];
+  // 🟢 urutan prioritas:
+  //    - jika wallet sedang di chain tertentu → pakai itu
+  //    - jika belum connect → pakai chain dari ENV
+  const activeChainId = walletChainId || CHAIN_ID;
 
-  const chainInfo =
-    CHAIN_INFO[activeChainId as keyof typeof CHAIN_INFO] ??
-    CHAIN_INFO[56];
+  const selected = CONTRACT_ADDRESSES[activeChainId as 97 | 56];
+  const chainInfo = CHAIN_INFO[activeChainId as 97 | 56];
 
   return {
     gicoin: {
-      address: selected.gicoin,
+      address: selected?.gicoin,
       abi: GICOIN_ABI,
     },
     staking: {
-      address: selected.staking,
+      address: selected?.staking,
       abi: GICOIN_ABI,
     },
-    rewardPoolWallet: selected.rewardPool,
-    admin: selected.admin,
-    taxWallet: selected.taxWallet,
+    rewardPoolWallet: selected?.rewardPool,
+    admin: selected?.admin,
+    taxWallet: selected?.taxWallet,
     chainInfo,
   } as const;
 }
 
-// Public client: gunakan RPC yang aman dan spesifik
+// -----------------------------------------------------------
+// PUBLIC CLIENT
+// -----------------------------------------------------------
 export const publicClient = createPublicClient({
-  chain: IS_MAINNET ? bsc : bscTestnet,
+  chain: ACTIVE_CHAIN, // 🟢 berdasarkan ENV
   transport: fallback([
-    http(IS_MAINNET ? "https://1rpc.io/bnb" : "https://bsc-testnet-rpc.publicnode.com"),
+    http(ACTIVE_CHAIN.id === 56
+      ? "https://1rpc.io/bnb"
+      : "https://bsc-testnet-rpc.publicnode.com"),
   ]),
 });
 
+// -----------------------------------------------------------
+// getWallet()
+// -----------------------------------------------------------
 export async function getWallet() {
   try {
     const account = getAccount(wagmiConfig);
@@ -104,17 +99,15 @@ export async function getWallet() {
     if (!client) throw new Error("⚠ Tidak dapat membuat wallet client.");
 
     const currentChain = client.chain?.id;
-    const targetChain = IS_MAINNET ? bsc.id : bscTestnet.id;
+    const expectedChain = ACTIVE_CHAIN.id;
 
-    if (currentChain !== targetChain) {
-      try {
-        switchChain(wagmiConfig, { chainId: targetChain });
-        console.info("🔄 Chain switched automatically.");
-      } catch (err) {
-        console.warn("⚠ User rejected chain switch.");
-      }
+    // ❗ Tidak ada auto-switch di sini
+    if (currentChain !== expectedChain) {
+      console.warn(
+        `⚠ Chain mismatch. Wallet=${currentChain}, ENV=${expectedChain}`
+      );
     }
-    
+
     return { account, client };
   } catch (err) {
     console.error("❌ getWallet() error:", err);

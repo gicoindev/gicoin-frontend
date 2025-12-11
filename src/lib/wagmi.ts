@@ -15,24 +15,25 @@ const TESTNET_RPC = [
   "https://data-seed-prebsc-2-s1.binance.org:8545",
 ];
 
-// MUST be const tuple
-const CHAINS = [bsc, bscTestnet] as const;
+// ENV menentukan chain
+const ENV_CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID || "56");
 
-const TRANSPORTS = {
-  [bsc.id]: fallback(MAINNET_RPC.map((url) => http(url))),
-  [bscTestnet.id]: fallback(TESTNET_RPC.map((url) => http(url))),
-};
+const ACTIVE_CHAIN = ENV_CHAIN_ID === 97 ? bscTestnet : bsc;
 
 export const wagmiConfig = getDefaultConfig({
   appName: "GICOIN DApp",
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
-  chains: CHAINS,
-  transports: TRANSPORTS,
 
-  /*
-   * 🔥 FIX PENTING!
-   * Wagmi harus punya storage persist agar wallet tidak disconnect
-   */
+  // 🟢 hanya 1 chain yang diberikan ke RainbowKit
+  chains: [ACTIVE_CHAIN],
+
+  transports: {
+    [ACTIVE_CHAIN.id]:
+      ACTIVE_CHAIN.id === 56
+        ? fallback(MAINNET_RPC.map((url) => http(url)))
+        : fallback(TESTNET_RPC.map((url) => http(url))),
+  },
+
   ssr: false,
   storage: createStorage({
     storage: cookieStorage,
