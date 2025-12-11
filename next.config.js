@@ -1,32 +1,23 @@
 const path = require("path");
 
-/** @type {import("next").NextConfig} */
 const nextConfig = {
-  output: "export",
-  images: {
-    unoptimized: true
-  },
+  images: { unoptimized: true },
   trailingSlash: true,
-
-  eslint: {
-    ignoreDuringBuilds: true
-  },
-
-  typescript: {
-    ignoreBuildErrors: true
-  },
+  output: "export",
 
   webpack: (config) => {
     config.resolve.alias = {
-      ...(config.resolve.alias || {}),
+      ...config.resolve.alias,
       "@react-native-async-storage/async-storage": path.resolve(
         __dirname,
         "async-storage-web.js"
-      )
+      ),
     };
-
     return config;
-  }
+  },
+
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
 };
 
 module.exports = nextConfig;

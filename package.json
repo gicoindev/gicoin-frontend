@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev:frontend": "next dev --webpack",
+    "build:frontend": "next build --webpack",
     "start": "next start",
     "export": "next export",
     "download-fonts": "node scripts/download-font.js",
@@ -17,7 +17,6 @@
     "detect-esm": "node scripts/find-esm-deps.js",
     "patch-esm": "node scripts/patch-jest-esm.js",
     "dev:backend": "npm run dev --prefix ../Gicoin/backend",
-    "dev:frontend": "next dev",
     "dev:all": "npx concurrently \"npm run dev --prefix ../Gicoin/backend\" \"npm run dev:frontend\""
   },
   "dependencies": {

@@ -1,9 +1,14 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "lib": ["dom", "dom.iterable", "es2020", "esnext.asynciterable"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "es2020",
+      "esnext.asynciterable"
+    ],
     "allowJs": true,
-    "skipLibCheck": true,                   // ✅ Hindari type mismatch antar deps
+    "skipLibCheck": true, // ✅ Hindari type mismatch antar deps
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
@@ -11,19 +16,27 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
-
     // ✅ Tambahan penting
-    "types": ["node", "react", "react-dom", "next"],
-
+    "types": [
+      "node",
+      "react",
+      "react-dom",
+      "next"
+    ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "react": ["./node_modules/@types/react"],      // ✅ Force single React types
-      "react-dom": ["./node_modules/@types/react-dom"]
+      "@/*": [
+        "src/*"
+      ],
+      "react": [
+        "./node_modules/@types/react"
+      ], // ✅ Force single React types
+      "react-dom": [
+        "./node_modules/@types/react-dom"
+      ]
     },
-
     "plugins": [
       {
         "name": "next"
@@ -36,7 +49,11 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "**/*.test.ts",
-    "**/*.test.tsx"
-, "next.config.js"  ],
-  "exclude": ["node_modules"]
+    "**/*.test.tsx",
+    "next.config.js",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

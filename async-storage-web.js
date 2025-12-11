@@ -1,6 +1,11 @@
 export default {
-    getItem: async () => null,
-    setItem: async () => {},
-    removeItem: async () => {},
-  };
-  
+  getItem: async (key) => {
+    return localStorage.getItem(key);
+  },
+  setItem: async (key, value) => {
+    return localStorage.setItem(key, value);
+  },
+  removeItem: async (key) => {
+    return localStorage.removeItem(key);
+  },
+};
