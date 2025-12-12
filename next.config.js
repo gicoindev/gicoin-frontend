@@ -1,12 +1,15 @@
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   images: { unoptimized: true },
   trailingSlash: true,
 
-  // ✅ ENABLE TURBOPACK (required for Next.js 16)
   turbopack: {
     resolveAlias: {
       "@react-native-async-storage/async-storage": "./async-storage-web.js",
+
+      // ⬇⬇ FIX: Prevent pino & thread-stream from bundling on client
+      "pino": false,
+      "pino-pretty": false,
+      "thread-stream": false,
     },
   },
 
