@@ -2,9 +2,6 @@ const path = require("path");
 
 const nextConfig = {
   images: { unoptimized: true },
-  trailingSlash: true,
-  output: "export",
-
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
@@ -15,7 +12,6 @@ const nextConfig = {
     };
     return config;
   },
-
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
 };

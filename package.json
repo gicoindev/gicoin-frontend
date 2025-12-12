@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev:frontend": "next dev --webpack",
-    "build:frontend": "next build --webpack",
+    "dev:frontend": "next dev",
+    "build:frontend": "next build",
+    "build": "next build",
     "start": "next start",
     "export": "next export",
     "download-fonts": "node scripts/download-font.js",
@@ -19,6 +20,7 @@
     "dev:backend": "npm run dev --prefix ../Gicoin/backend",
     "dev:all": "npx concurrently \"npm run dev --prefix ../Gicoin/backend\" \"npm run dev:frontend\""
   },
+  
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-progress": "^1.1.7",
