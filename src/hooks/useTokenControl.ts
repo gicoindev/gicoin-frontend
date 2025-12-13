@@ -229,21 +229,28 @@ export function useTokenControl() {
   async function checkConnection() {
     try {
       if (!client) throw new Error("No public client available.");
-      if (chain?.id !== 97) {
-        throw new Error("Wrong network: switch to BSC Testnet.");
+  
+      const EXPECTED_CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID);
+  
+      if (chain?.id !== EXPECTED_CHAIN_ID) {
+        throw new Error(
+          `Wrong network: please switch to ${
+            EXPECTED_CHAIN_ID === 56 ? "BSC Mainnet" : "BSC Testnet"
+          }.`
+        );
       }
-
+  
       const owner = await client.readContract({
         address: gicoin.address,
         abi: gicoin.abi,
         functionName: "owner",
       });
-
+  
       toast({
         title: "🟢 Connected to GICO",
         description: `Owner: ${owner}`,
       });
-
+  
       return { address: gicoin.address, owner };
     } catch (err: any) {
       toast({
@@ -254,7 +261,7 @@ export function useTokenControl() {
       throw err;
     }
   }
-
+  
   // ============================================================================
   // 🔁 RETURN EXPORT API
   // ============================================================================
