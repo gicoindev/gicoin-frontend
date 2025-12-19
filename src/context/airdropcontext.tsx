@@ -31,7 +31,6 @@ export function AirdropProvider({ children }: { children: ReactNode }) {
 
   const shouldStart = Boolean(isConnected && address && isActive);
 
-  // Now pass optional args into hooks
   const status = useAirdropStatus(shouldStart ? address : null);
   const actions = useAirdropActions(shouldStart ? status.refetch : undefined);
   const events = useAirdropEvents(shouldStart);
@@ -46,23 +45,18 @@ export function AirdropProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
-      // Spread status/events/actions first so explicit fields below override them
       ...status,
       ...events,
       ...actions,
 
-      // then explicit top-level props (ensures no accidental overwrite)
-      address,
       isConnected,
       isActive,
       MERKLE_ROOT,
 
-      // wrapped actions
       register: wrapAction(actions.register),
       claimWithWhitelist: wrapAction(actions.claimWithWhitelist),
       claimWithMerkle: wrapAction(actions.claimWithMerkle),
     }),
-    // include everything we rely on
     [address, isConnected, isActive, MERKLE_ROOT, status, events, actions]
   );
 

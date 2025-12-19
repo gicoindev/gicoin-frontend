@@ -2,7 +2,7 @@
 interface VoteProgressProps {
   votesFor: number;
   votesAgainst: number;
-  quorumPercent?: number; // default 50 kalau gak dikasih
+  quorumPercent?: number;
 }
 
 export default function VoteProgress({
@@ -21,7 +21,7 @@ export default function VoteProgress({
 
   return (
     <div className="space-y-2">
-      {/* Persentase & Jumlah Suara */}
+      {/* Persentase & count vote */}
       <div className="flex justify-between text-xs sm:text-sm font-medium">
         <span className="text-green-400">
           ✅ YES {yesPercent}% ({votesFor})
@@ -31,7 +31,7 @@ export default function VoteProgress({
         </span>
       </div>
 
-      {/* Progress Bar dengan quorum marker */}
+      {/* Progress Bar with quorum marker */}
       <div className="relative w-full bg-gray-700 rounded-full h-3 sm:h-4 overflow-hidden flex">
         {/* YES */}
         <div
@@ -55,7 +55,7 @@ export default function VoteProgress({
             }`}
           ></div>
 
-          {/* Tooltip selalu tampil */}
+          {/* Tooltip always display */}
           <div
             className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-1 rounded-md text-xs bg-black text-white"
           >

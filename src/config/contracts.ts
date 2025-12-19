@@ -39,19 +39,17 @@ export const CHAIN_INFO = {
 } as const;
 
 // -----------------------------------------------------------
-// ENV-driven chain selection (🔥 akar fix utama)
+// ENV-driven chain selection (🔥 root fix)
 // -----------------------------------------------------------
-const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID); // 97 or 56
+const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID);
 const ACTIVE_CHAIN = CHAIN_ID === 97 ? bscTestnet : bsc;
 
 // -----------------------------------------------------------
 // HOOK: useContracts()
 // -----------------------------------------------------------
 export function useContracts() {
-  // ❌ Hapus ini (memicu bug Wrong Network)
   // const walletChainId = useChainId();
-
-  // ✅ ENV selalu prioritas
+  // ✅ ENV priorities
   const activeChainId = CHAIN_ID;
 
   const selected = CONTRACT_ADDRESSES[activeChainId as 97 | 56];
@@ -77,7 +75,7 @@ export function useContracts() {
 // PUBLIC CLIENT
 // -----------------------------------------------------------
 export const publicClient = createPublicClient({
-  chain: ACTIVE_CHAIN, // 🟢 berdasarkan ENV
+  chain: ACTIVE_CHAIN, // 🟢 based on ENV
   transport: fallback([
     http(ACTIVE_CHAIN.id === 56
       ? "https://1rpc.io/bnb"

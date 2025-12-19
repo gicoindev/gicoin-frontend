@@ -1,36 +1,123 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gicoin DApp — Frontend
 
-## Getting Started
+Gicoin DApp is a Web3 application built on **BNB Smart Chain (BSC)** that provides
+token utilities including airdrop distribution, staking rewards, on-chain governance,
+and an admin dashboard for managing token parameters and reward pools.
 
-First, run the development server:
+This repository contains the **frontend application** of the Gicoin ecosystem.
+
+---
+
+## 🚀 Live DApp
+
+<https://gicoindapps.netlify.app>
+
+---
+
+## 🔗 Blockchain Network
+
+- **BNB Smart Chain Mainnet**
+  - Chain ID: `56`
+
+---
+
+## 🪙 Token Contract (BSC Mainnet)
+
+- **GICO Token**
+
+`0xE4A9a0a40468EFC73c5ab64fC4E86C765eFaB4Dd`
+
+### 📊 PancakeSwap Listing
+
+GICO token is listed with active liquidity on PancakeSwap:
+
+🔗 <https://pancakeswap.finance/info/tokens/0xe4a9a0a40468efc73c5ab64fc4e86c765efab4dd>
+
+---
+
+## 🧩 Features
+
+- Wallet connection (MetaMask, WalletConnect)
+- Token staking & reward pool
+- Airdrop claim system
+- On-chain governance
+- Admin panel for token and system management
+- PancakeSwap liquidity integration
+
+---
+
+## 🛠 Technology Stack
+
+- **Frontend**: Next.js (App Router), React
+- **Web3**: wagmi, viem, RainbowKit
+- **Blockchain**: BNB Smart Chain (EVM)
+- **Wallets**: MetaMask, WalletConnect
+
+---
+
+## 🧪 Development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# Gicoin DApp — Frontend
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Gicoin DApp is a Web3 application built on **BNB Smart Chain (BSC)** that provides
+token utilities including airdrop distribution, staking rewards, on-chain governance,
+and an admin dashboard for managing token parameters and reward pools.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This repository contains the **frontend application** of the Gicoin ecosystem.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🚀 Live DApp
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+https://gicoindapps.netlify.app
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🔗 Blockchain Network
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **BNB Smart Chain Mainnet**
+  - Chain ID: `56`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 🪙 Token Contract (BSC Mainnet)
+
+- **GICO Token**
+
+`0xE4A9a0a40468EFC73c5ab64fC4E86C765eFaB4Dd`
+
+---
+
+## 🧩 Features
+
+- Wallet connection (MetaMask, WalletConnect)
+- Token staking & reward pool
+- Airdrop claim system
+- On-chain governance
+- Admin panel for token and system management
+- PancakeSwap liquidity integration
+
+---
+
+## 🛠 Technology Stack
+
+- **Frontend**: Next.js (App Router), React
+- **Web3**: wagmi, viem, RainbowKit
+- **Blockchain**: BNB Smart Chain (EVM)
+- **Wallets**: MetaMask, WalletConnect
+
+---
+
+## 🧪 Development
+
+```bash
+npm install
+npm run dev
+
+The app will run at:
+
+http://localhost:3000

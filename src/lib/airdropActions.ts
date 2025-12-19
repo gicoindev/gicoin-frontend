@@ -9,7 +9,6 @@ import {
 } from "@wagmi/core";
 import { parseUnits, type Abi } from "viem";
 
-// Kontrak address (dari .env sesuai chain aktif frontend)
 const GICOIN_ADDRESS = process.env
   .NEXT_PUBLIC_CONTRACT_ADDRESS! as `0x${string}`;
 

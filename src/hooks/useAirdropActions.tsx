@@ -56,7 +56,6 @@ export function useAirdropActions(refetch?: () => void) {
     try {
       if (!address) throw new Error("⚠️ Please connect your wallet first.");
 
-      // Send TX via wagmi only (no ethers!)
       const hash = await writeContractAsync({
         address: gicoin.address,
         abi: gicoin.abi as Abi,

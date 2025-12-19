@@ -55,10 +55,9 @@ module.exports = {
 		},
   
 		fontFamily: {
-		  sans: ["var(--font-inter)", "sans-serif"], // ✅ Inter jadi default font
+		  sans: ["var(--font-inter)", "sans-serif"],
 		},
   
-		// ✅ Tambahan animation utilities
 		animation: {
 		  glow: "glow 1s ease-in-out",
 		  fadeIn: "fadeIn 0.3s ease-in-out",

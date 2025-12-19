@@ -163,7 +163,6 @@ export function useStakingHistory() {
     [address, publicClient, gicoin, endBlock, loading]
   );
 
-  // Fetch initial only when address changes
   useEffect(() => {
     if (address) fetchHistory(false);
   }, [address]);

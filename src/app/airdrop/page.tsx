@@ -8,7 +8,7 @@ import LogsPanel from "@/components/airdrop/logspanel";
 import RegisterAirdrop from "@/components/airdrop/registerairdrop";
 import StatusPanel from "@/components/airdrop/statuspanel";
 import WalletInfo from "@/components/ui/walletinfo";
-import { AirdropProvider } from "@/context/airdropcontext"; // ✅ IMPORT
+import { AirdropProvider } from "@/context/airdropcontext";
 import { useAccount } from "wagmi";
 
 export default function AirdropPage() {
@@ -50,7 +50,7 @@ export default function AirdropPage() {
           {/* Logs */}
           <Card className="bg-gray-900/80 rounded-xl shadow-md mb-20">
             <CardContent className="p-4">
-              <LogsPanel key={address} /> {/* pakai key biar re-mount saat wallet berubah */}
+              <LogsPanel key={address} /> {/*  re-mount wallet changes */}
             </CardContent>
           </Card>
         </div>

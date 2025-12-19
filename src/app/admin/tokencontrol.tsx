@@ -38,7 +38,7 @@ export default function TokenControl() {
   // Fetch on-chain values
   const fetchData = async () => {
     try {
-      if (!client) return; // ⭐ mencegah undefined
+      if (!client) return;
   
       const [taxRateRaw, rewardRateRaw] = await Promise.all([
         client.readContract({
@@ -61,7 +61,7 @@ export default function TokenControl() {
   };
 
   useEffect(() => {
-    if (!client) return; // ⭐ tunggu wagmi siap
+    if (!client) return;
   
     fetchData();
     const interval = setInterval(fetchData, 10000);

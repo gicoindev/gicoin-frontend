@@ -15,7 +15,6 @@ const TESTNET_RPC = [
   "https://data-seed-prebsc-2-s1.binance.org:8545",
 ];
 
-// ENV menentukan chain
 const ENV_CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID || "56");
 
 const ACTIVE_CHAIN = ENV_CHAIN_ID === 97 ? bscTestnet : bsc;
@@ -24,7 +23,6 @@ export const wagmiConfig = getDefaultConfig({
   appName: "GICOIN DApp",
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
 
-  // 🟢 hanya 1 chain yang diberikan ke RainbowKit
   chains: [ACTIVE_CHAIN],
 
   transports: {

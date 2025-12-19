@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { CardGold } from "@/components/ui/card-gold";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TabsContent } from "@/components/ui/tabs"; // pastikan ini ada
+import { TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useTokenStats } from "@/hooks/useTokenStats";
 import { useEffect, useState } from "react";

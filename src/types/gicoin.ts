@@ -9,17 +9,14 @@ import type { Abi } from "viem";
  */
 export type GicoinAbi = typeof GICOIN_ABI extends Abi ? typeof GICOIN_ABI : Abi;
 
-/** Nama event yang tersedia di GICOiN */
 export type GicoinEventNames = ExtractAbiEventNames<GicoinAbi>;
 
-/** Semua event dari ABI */
 export type GicoinEvent<T extends GicoinEventNames> = ExtractAbiEvent<
   GicoinAbi,
   T
 >;
 
 /**
- * Khusus typing untuk event Airdrop
  */
 export type AirdropRegisteredEvent = ExtractAbiEvent<
   GicoinAbi,
@@ -32,7 +29,6 @@ export type AirdropClaimFailedEvent = ExtractAbiEvent<
 >;
 
 /**
- * Bentuk log yang dipakai di aplikasi
  */
 export type AirdropEvent =
   | {

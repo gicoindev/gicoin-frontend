@@ -7,7 +7,6 @@ export default function WalletInfo() {
   const { address, poolBalance, claimed, loading, refetch } = useAirdrop();
   const prevAddress = useRef<string | undefined>(undefined);
 
-  // 🧠 Log perubahan address untuk debugging
   useEffect(() => {
     if (prevAddress.current !== address) {
       console.log("🔁 Wallet changed:", {
@@ -15,7 +14,6 @@ export default function WalletInfo() {
         new: address,
       });
 
-      // Refetch data otomatis setiap kali wallet berubah
       if (address) {
         console.log("🔄 Fetching new wallet data...");
         refetch?.();
@@ -25,7 +23,7 @@ export default function WalletInfo() {
     }
   }, [address, refetch]);
 
-  // ✨ Shimmer effect saat loading
+  // ✨ Shimmer effect on loading
   if (loading) {
     return (
       <div className="p-4 rounded-2xl bg-neutral-900 shadow text-white space-y-3 animate-pulse">
@@ -37,7 +35,7 @@ export default function WalletInfo() {
     );
   }
 
-  // 🧾 Data utama wallet
+  // 🧾 main data wallet
   return (
     <div className="p-4 rounded-2xl bg-neutral-900 shadow text-white space-y-2">
       <h2 className="text-lg font-bold">👛 Wallet Info</h2>

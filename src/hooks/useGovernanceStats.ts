@@ -33,7 +33,7 @@ export function useGovernanceStats(proposalId?: number) {
     functionName: "quorumPercentage",
   })
 
-  // ✅ Ambil voters via event logs (event Voted)
+  // ✅ voters via event logs (event Voted)
   async function fetchVoters(): Promise<Voter[]> {
     if (!proposalId) return [];
     if (!publicClient) return [];

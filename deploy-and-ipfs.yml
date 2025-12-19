@@ -1,7 +1,7 @@
 name: Build + Export + Upload to Web3.Storage
 on:
   push:
-    branches: [ main ]  # atau production
+    branches: [ main ]
 jobs:
   build-and-ipfs:
     runs-on: ubuntu-latest

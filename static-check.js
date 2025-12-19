@@ -123,6 +123,4 @@ console.log("\n========================================\n");
 console.log(`${GREEN}✔ Done. Run with: ${RESET}node static-check.js\n`);
 
 
-
-
 //node static-check.jsz

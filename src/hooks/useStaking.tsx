@@ -227,7 +227,6 @@ export function useStaking() {
         throw new Error("Tidak ada reward yang bisa di-claim.");
       }
 
-      // Claim must use claimReward(uint256 amount)
       const hash = await writeContractAsync({
         address: gicoin.address,
         abi: gicoin.abi as Abi,

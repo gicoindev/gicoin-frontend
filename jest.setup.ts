@@ -3,13 +3,13 @@ import 'cross-fetch/polyfill'
 import { TextDecoder, TextEncoder } from 'util'
 
 // --------------------------------------------------
-// Polyfill TextEncoder/TextDecoder (buat viem/wagmi)
+// Polyfill TextEncoder/TextDecoder (viem/wagmi)
 // --------------------------------------------------
 global.TextEncoder = TextEncoder as any
 global.TextDecoder = TextDecoder as any
 
 // --------------------------------------------------
-// Polyfill global crypto (buat web3 libs di Node env)
+// Polyfill global crypto (web3 libs di Node env)
 // --------------------------------------------------
 import { webcrypto } from 'crypto'
 if (!global.crypto) {
@@ -36,10 +36,8 @@ jest.mock('next/router', () => ({
 }))
 
 // --------------------------------------------------
-// Mock next/image (tanpa akses React langsung!)
+// Mock next/image (Live react!)
 // --------------------------------------------------
-// 🟢 Cara ini aman karena return "plain React element object"
-//    tanpa harus import React di file ini
 jest.mock('next/image', () => ({
   __esModule: true,
   default: (props: any) => ({

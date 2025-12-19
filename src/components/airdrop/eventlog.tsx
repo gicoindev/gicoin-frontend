@@ -1,21 +1,19 @@
 "use client";
 import { useGovernanceContext } from "@/context/governancecontext";
 import { useEffect, useRef } from "react";
-import { useAccount } from "wagmi"; // ✅ tambahkan ini
+import { useAccount } from "wagmi";
 
-export default function EventLog({ address }: { address?: string }) {  // ✅ tambahkan prop address
+export default function EventLog({ address }: { address?: string }) {
   const { events, selectedProposal } = useGovernanceContext();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { address: activeAddress } = useAccount(); // ✅ ambil dari wallet juga
-
+  const { address: activeAddress } = useAccount();
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
     }
-  }, [events.length, address, activeAddress]); // ✅ tambahkan dependency address
+  }, [events.length, address, activeAddress]);
 
-  // filter hanya event governance milik proposal terpilih
   const filteredEvents = selectedProposal
     ? events.filter((e) => {
         const args = e.detail?.args
@@ -24,7 +22,7 @@ export default function EventLog({ address }: { address?: string }) {  // ✅ ta
       })
     : events
 
-  // format jam
+  // format timer
   const formatTime = (t?: string) => {
     if (!t) return ""
     const d = new Date(t)
@@ -123,7 +121,7 @@ export default function EventLog({ address }: { address?: string }) {  // ✅ ta
     }
   }
 
-  // Grouping event per kategori
+  // Grouping event categories
   const grouped = {
     governance: filteredEvents.filter((e) =>
       ["ProposalCreated", "Voted", "VotingClosed", "ProposalExecuted"].includes(e.type)

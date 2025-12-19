@@ -4,11 +4,11 @@ const https = require("https");
 
 const fonts = [
   {
-    url: "https://fonts.gstatic.com/s/inter/v19/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2", // Regular 400
+    url: "https://fonts.gstatic.com/s/inter/v19/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2",
     name: "Inter-Regular.woff2",
   },
   {
-    url: "https://fonts.gstatic.com/s/inter/v19/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7SUc.woff2", // Bold 700
+    url: "https://fonts.gstatic.com/s/inter/v19/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa25L7SUc.woff2",
     name: "Inter-Bold.woff2",
   },
 ];
@@ -22,7 +22,6 @@ if (!fs.existsSync(outputDir)) {
 fonts.forEach(({ url, name }) => {
   const filePath = path.join(outputDir, name);
 
-  // ✅ skip kalau sudah ada
   if (fs.existsSync(filePath)) {
     console.log(`ℹ️  Skip, already exists: ${name}`);
     return;

@@ -7,7 +7,6 @@ export default function LogsPanel() {
   const { logs, address, isConnected } = useAirdrop();
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // 🧹 Auto scroll ke atas saat log baru masuk
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.scrollTop = 0;

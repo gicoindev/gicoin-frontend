@@ -52,7 +52,6 @@ export default function RegisterAirdrop() {
         { id: toastId }
       );
 
-      // 🧩 Tambahkan delay pendek agar event sync dari chain sempat masuk
       setTimeout(() => refetch?.(), 1000);
     } catch (err: any) {
       console.error("❌ Register error:", err);

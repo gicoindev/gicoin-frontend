@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { formatUnits } from "viem";
 import { useReadContract, useWatchBlocks } from "wagmi";
 
-// Tipe data output biar strongly typed
 interface AdminStats {
   totalSupply: string;
   totalStaked: string;

@@ -5,7 +5,6 @@ import { useGovernanceContext } from "@/context/governancecontext"
 export default function EventLog() {
   const { events, selectedProposal } = useGovernanceContext()
 
-  // Filter hanya event untuk proposalId yang sedang dipilih
   const filteredEvents = selectedProposal
     ? events.filter((e) => {
         const args = e.detail?.args

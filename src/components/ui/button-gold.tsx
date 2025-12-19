@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 
 interface ButtonGoldProps extends React.ComponentProps<typeof Button> {
-  goldVariant?: "solid" | "outline"; // 🔥 custom prop biar beda sama bawaan
+  goldVariant?: "solid" | "outline";
 }
 
 export function ButtonGold({

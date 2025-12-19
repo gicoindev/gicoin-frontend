@@ -6,7 +6,7 @@ type Props = {
   onClaim: () => void;
   canUnstake: boolean;
   canClaim: boolean;
-  loading?: boolean; // ✅ tambahan baru
+  loading?: boolean;
 };
 
 export default function StakingActionBar({

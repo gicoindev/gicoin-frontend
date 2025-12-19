@@ -222,7 +222,6 @@ export function useAirdropStatus(addressArg?: string | null) {
     };
   }, []);
 
-  // Refetch when address changes
   useEffect(() => {
     if (!address) {
       setStatus((prev) => ({ ...prev, loading: false }));
@@ -248,7 +247,6 @@ export function useAirdropStatus(addressArg?: string | null) {
     onLogs: () => fetchStatus(),
   });
 
-  // Reset on disconnect
   useEffect(() => {
     if (!address && isMounted.current) {
       setStatus({

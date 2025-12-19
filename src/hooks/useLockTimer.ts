@@ -14,17 +14,17 @@ export function useLockTimer(address?: `0x${string}`) {
   const [countdown, setCountdown] = useState("");
   const [canUnstake, setCanUnstake] = useState(false);
 
-  // 🧭 Ambil timestamp staking terakhir dari kontrak
+  // 🧭 Take timestamp staking the lastime from contract
   const { data: stakingTime } = useReadContract({
     abi: gicoin.abi,
     address: gicoin.address,
     functionName: "stakingTime",
     args: address ? [address] : undefined,
-    // Wagmi v2: gunakan scopeKey instead of query.enabled
+    // Wagmi v2: use scopeKey instead of query.enabled
     scopeKey: address ? `stakingTime-${address}` : undefined,
   });
 
-  // ⏳ Update lockUntil dari stakingTime + 30 hari
+  // ⏳ Update lockUntil from stakingTime + 30 days
   useEffect(() => {
     if (!stakingTime) {
       setLockUntil(null);

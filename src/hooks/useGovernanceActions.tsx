@@ -46,7 +46,6 @@ export function useGovernanceActions() {
           args,
         });
 
-        // Wait for blockchain confirmation
         await waitForTransactionReceipt(wagmiConfig, { hash });
 
         toast.success(

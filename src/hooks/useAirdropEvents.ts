@@ -12,7 +12,6 @@ import { useWatchContractEvent } from "wagmi";
 export function useAirdropEvents(enabledOverride?: boolean) {
   const { gicoin } = useContracts();
   const pathname = usePathname();
-  // allow caller to override isActive
   const isActive = typeof enabledOverride === "boolean" ? enabledOverride : !!pathname?.includes("/airdrop");
 
   const [logs, setLogs] = useState<AirdropEvent[]>([]);

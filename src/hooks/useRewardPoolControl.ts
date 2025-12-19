@@ -14,7 +14,7 @@ import {
 export function useRewardPoolControl() {
   const { toast } = useToast();
   const { address, chain } = useAccount();
-  const { gicoin, rewardPoolWallet } = useContracts(); // hanya address pool, bukan kontrak
+  const { gicoin, rewardPoolWallet } = useContracts();
   const { writeContractAsync } = useWriteContract();
   const client = usePublicClient();
 
@@ -52,7 +52,7 @@ export function useRewardPoolControl() {
     functionName: "getRewardPoolStatus",
   });
 
-  // rewardRate variable langsung dari kontrak
+  // rewardRate variable direct from contract
   const rewardRateQuery = useReadContract({
     abi: gicoin.abi as Abi,
     address: gicoin.address,

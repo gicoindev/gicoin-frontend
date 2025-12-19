@@ -9,7 +9,6 @@ interface CardGoldProps {
 }
 
 export function CardGold({ title, description, value, children, className }: CardGoldProps) {
-  // 🌈 Pilih warna otomatis berdasarkan nilai numerik (jika ada)
   const numericValue =
     typeof value === "string" && !isNaN(Number(value)) ? Number(value) : undefined
 

@@ -80,7 +80,7 @@ export function AirdropStatusCard({ account }: AirdropStatusCardProps) {
 
             <p className="text-white text-2xl font-bold mt-2">{amount} GIC</p>
 
-            {/* Redirect ke halaman claim */}
+            {/* Redirect page claim */}
             <ButtonGold
               className="mt-4"
               onClick={() => (window.location.href = "/airdrop")}

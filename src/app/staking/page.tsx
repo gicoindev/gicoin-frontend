@@ -26,7 +26,7 @@ export default function StakingPage() {
 
   const { gicoin } = useContracts();
 
-  // 🎯 HOOK UTAMA TRANSAKSI + EVENT
+  // 🎯 HOOK MAIN TRANSACTION + EVENT
   const {
     staked,
     stake,
@@ -51,7 +51,7 @@ export default function StakingPage() {
     gicoin.abi
   );
 
-  // 🎯 Lock timer (30 hari unstake)
+  // 🎯 Lock timer (30 DAY unstake)
   const { lockUntil, countdown, canUnstake } = useLockTimer(address);
 
   const [amount, setAmount] = useState("");
@@ -113,7 +113,7 @@ export default function StakingPage() {
       return toast.error("Tidak ada reward yang bisa di-claim.");
 
     try {
-      await toast.promise(claimReward(), { // <--- sekarang kosong => claim sisa reward
+      await toast.promise(claimReward(), {
         loading: "⏳ Mengirim transaksi claim...",
         success: "🎉 Reward berhasil di-claim!",
         error: "❌ Gagal claim reward",

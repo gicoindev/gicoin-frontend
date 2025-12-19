@@ -26,7 +26,7 @@ export interface Proposal {
 // =======================
 async function safeRange(client: any) {
   const latest = await client.getBlockNumber();
-  const RANGE = 50000n; // max allowed for public BSC RPC
+  const RANGE = 50000n;
 
   return {
     from: latest > RANGE ? latest - RANGE : 0n,

@@ -25,7 +25,6 @@ export default function StakeForm({
   const isBelowMin = Number(amount) < Number(minStake) && amount !== "";
 
   useEffect(() => {
-    // bisa dipakai nanti untuk animasi / effect
   }, [minStake]);
 
   return (

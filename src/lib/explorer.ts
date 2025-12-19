@@ -13,7 +13,7 @@ export function getExplorerUrl(txHash: string, chainId?: number) {
   if (!txHash || typeof txHash !== "string") return null;
 
   const base = explorers[chainId ?? -1];
-  if (!base) return null; // chain tidak dikenal
+  if (!base) return null;
 
   return `${base}${txHash}`;
 }

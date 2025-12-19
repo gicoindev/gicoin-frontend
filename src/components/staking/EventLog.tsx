@@ -21,14 +21,13 @@ interface EventLogProps {
 
 /**
  * ✅ EventLog Component
- * Menampilkan event staking secara realtime dengan filter & explorer link
  */
 export default function EventLog({ events, onRefresh }: EventLogProps) {
   const chainId = useChainId();
   const [filter, setFilter] = useState("all");
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  // Auto-scroll ke atas saat ada event baru
+  // Auto-scroll
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
   }, [events]);

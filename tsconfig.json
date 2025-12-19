@@ -8,7 +8,7 @@
       "esnext.asynciterable"
     ],
     "allowJs": true,
-    "skipLibCheck": true, // ✅ Hindari type mismatch antar deps
+    "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
@@ -18,7 +18,7 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
-    // ✅ Tambahan penting
+
     "types": [
       "node",
       "react",
@@ -32,7 +32,7 @@
       ],
       "react": [
         "./node_modules/@types/react"
-      ], // ✅ Force single React types
+      ],
       "react-dom": [
         "./node_modules/@types/react-dom"
       ]

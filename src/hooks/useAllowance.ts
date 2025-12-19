@@ -42,7 +42,7 @@ export function useAllowance(
       });
   
       toast.success("Approval transaction sent!");
-      await refetch(); // ← ini valid
+      await refetch();
       return tx;
     } catch (err) {
       console.error("Approval failed:", err);

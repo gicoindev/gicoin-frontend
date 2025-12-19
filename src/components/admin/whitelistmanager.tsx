@@ -12,7 +12,6 @@ export default function WhitelistManager() {
   const { toast } = useToast();
   const { setWhitelist, loading } = useAdminActions();
 
-  // 🟡 Rename agar tidak bentrok dengan useAccount().address
   const [inputAddress, setInputAddress] = useState("");
 
   const validateAddress = () => {

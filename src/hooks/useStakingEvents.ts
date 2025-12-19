@@ -6,7 +6,7 @@ import { useAccount, useWatchContractEvent } from "wagmi";
 
 /**
  * 🔁 Listen to staking-related contract events in real time.
- * Hanya trigger refetchStats agar tidak spam RPC.
+ * Only trigger refetchStats for not spam RPC.
  */
 export function useStakingEvents(refetchStats?: () => void) {
   const { gicoin } = useContracts();

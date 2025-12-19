@@ -89,7 +89,6 @@ export function useAirdropAdmin(refetch?: () => void) {
     setLoading(true);
     setError(null);
 
-    // Verify owner
     const ownerOk = await checkOwner();
     if (!ownerOk) {
       setLoading(false);
@@ -100,7 +99,6 @@ export function useAirdropAdmin(refetch?: () => void) {
     const toastId = toast.loading(`⏳ Executing ${fn}...`);
 
     try {
-      // Send TX
       const hash = await writeContractAsync({
         address: gicoin.address,
         abi: gicoin.abi as Abi,
@@ -108,7 +106,6 @@ export function useAirdropAdmin(refetch?: () => void) {
         args,
       });
 
-      // Wait for confirmation
       const receipt = await waitTx(hash);
       const txHash = receipt?.transactionHash || hash;
 

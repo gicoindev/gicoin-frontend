@@ -2,7 +2,7 @@
 import { wagmiConfig } from "@/lib/wagmi";
 
 /* =====================================================
-   ✅ Re-export config agar konsisten di seluruh app
+   ✅ Re-export config make sure consitency on the app
 ===================================================== */
 export { wagmiConfig };
 
@@ -12,21 +12,16 @@ export { wagmiConfig };
 export function parseErrorMessage(err: any): string {
   let reason = "";
 
-  // ethers v6
   if (err.reason) reason = err.reason;
-  // ethers v5
   else if (err.error && err.error.message) reason = err.error.message;
-  // raw message
   else if (err.message) reason = err.message;
-  // kalau string langsung
   else if (typeof err === "string") reason = err;
   else reason = "Transaction failed";
 
-  // 🧠 Bersihin prefix error agar lebih clean
   reason = reason.replace("execution reverted: ", "").replace("VM Exception while processing transaction: ", "");
 
   /* =====================================================
-     🎯 Mapping dari kode error di kontrak Gicoin.sol
+     🎯 Mapping error Gicoin.sol
   ===================================================== */
   const map: Record<string, string> = {
     E11: "Jumlah staking harus lebih dari 0 ⚠️",
@@ -63,12 +58,11 @@ export function parseErrorMessage(err: any): string {
     if (reason.includes(key)) return msg;
   }
 
-  // 🌐 Error umum lainnya
+  // 🌐 Error else
   if (reason.includes("insufficient funds")) return "Saldo kamu tidak cukup untuk gas fee ⛽";
   if (reason.includes("user rejected")) return "Transaksi dibatalkan oleh user 🙅";
   if (reason.includes("execution reverted")) return "Transaksi dibatalkan di blockchain ❌";
   if (reason.includes("missing revert data")) return "Transaksi gagal tanpa pesan (cek gas limit atau RPC) ⚙️";
 
-  // fallback
   return reason || "Terjadi kesalahan saat transaksi ⚠️";
 }

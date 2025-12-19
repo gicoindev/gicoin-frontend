@@ -145,7 +145,7 @@ export function useStakingActions() {
       if (amount) {
         parsed = typeof amount === "bigint" ? amount : parseEther(amount);
       } else {
-        parsed = await getStakedBalance(); // FULL unstake
+        parsed = await getStakedBalance();
       }
 
       return txHandler("unstake", [parsed], {

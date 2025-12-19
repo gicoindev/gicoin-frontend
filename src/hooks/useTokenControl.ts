@@ -13,7 +13,7 @@ import {
 
 /**
  * =============================================================================
- * 🔥 useTokenControl — Full Admin Hook for GICO Token
+ * 🔥 useTokenControl — Full Admin Hook for GIC Token
  * Matches 100% with Gicoin.sol (all owner/admin functions mapped properly)
  * =============================================================================
  */

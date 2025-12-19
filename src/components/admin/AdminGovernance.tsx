@@ -11,11 +11,11 @@ export default function AdminGovernance() {
 
   // proposal times
   const [proposalId, setProposalId] = useState("");
-  const [startIso, setStartIso] = useState(""); // datetime-local string
+  const [startIso, setStartIso] = useState("");
   const [endIso, setEndIso] = useState("");
 
-  // alternatif: durasi (detik)
-  const [votingDurationSeconds, setVotingDurationSeconds] = useState(""); // optional
+  // alternatif: duration (detik)
+  const [votingDurationSeconds, setVotingDurationSeconds] = useState("");
 
   const handleSetQuorum = async () => {
     if (!percent) return;
@@ -23,23 +23,21 @@ export default function AdminGovernance() {
     setPercent("");
   };
 
-  // Handler: menggunakan datetime-local inputs
+  // Handler: use datetime-local inputs
   const handleTimesWithDates = async () => {
     if (!proposalId) return;
-    // konversi ISO -> epoch seconds
     const start = startIso ? Math.floor(new Date(startIso).getTime() / 1000) : Math.floor(Date.now() / 1000);
-    const end = endIso ? Math.floor(new Date(endIso).getTime() / 1000) : start + 7 * 24 * 3600; // default 7 days
+    const end = endIso ? Math.floor(new Date(endIso).getTime() / 1000) : start + 7 * 24 * 3600;
     await setProposalTimes(Number(proposalId), start, end);
     setProposalId("");
     setStartIso("");
     setEndIso("");
   };
 
-  // Alternatif: kalau input hanya votingDuration (detik)
   const handleTimesWithDuration = async () => {
     if (!proposalId || !votingDurationSeconds) return;
     const start = Math.floor(Date.now() / 1000);
-    const end = start + Number(votingDurationSeconds); // votingDurationSeconds diasumsikan dalam detik
+    const end = start + Number(votingDurationSeconds);
     await setProposalTimes(Number(proposalId), start, end);
     setProposalId("");
     setVotingDurationSeconds("");

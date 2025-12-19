@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from "react";
 import { formatEther } from "viem";
 import { useAccount, usePublicClient, useWatchContractEvent } from "wagmi";
 
-// 🧩 Helper aman untuk konversi nilai unknown ke BigInt
 const safeBigInt = (val: unknown): bigint => {
   try {
     if (typeof val === "bigint") return val;

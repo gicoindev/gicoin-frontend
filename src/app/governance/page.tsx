@@ -10,7 +10,6 @@ import { useAccount } from "wagmi";
 export default function GovernancePage() {
   const { isConnected } = useAccount();
 
-  // Jika belum connect, jangan load komponen yang fetch on-chain
   if (!isConnected) {
     return (
       <div className="p-6 min-h-screen flex items-center justify-center bg-gray-950">

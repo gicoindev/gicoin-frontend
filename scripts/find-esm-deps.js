@@ -18,7 +18,6 @@ function findESMDeps() {
   for (const dir of fs.readdirSync(nodeModules)) {
     if (dir.startsWith(".")) continue;
 
-    // Scoped packages (@rainbow-me/rainbowkit)
     if (dir.startsWith("@")) {
       const scopedPath = path.join(nodeModules, dir);
       for (const sub of fs.readdirSync(scopedPath)) {
