@@ -29,7 +29,7 @@ This repository contains the **frontend application** of the Gicoin ecosystem.
 
 ### 📊 PancakeSwap Listing
 
-GICO token is listed with active liquidity on PancakeSwap:
+GIC token is listed with active liquidity on PancakeSwap:
 
 🔗 <https://pancakeswap.finance/info/tokens/0xe4a9a0a40468efc73c5ab64fc4e86c765efab4dd>
 
